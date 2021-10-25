@@ -1,2 +1,2 @@
-# ginac-wasm
+# GiNaC-wasm
 GiNaC in JavaScript

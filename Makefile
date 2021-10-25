@@ -2,19 +2,18 @@
 SHELL := /bin/bash
 .SHELLFLAGS = -ec
 
-
-# ifneq ($(RELEASE),)
+ifneq ($(RELEASE),)
 extra_flags := -flto -Oz -O3
 build := build/release
-# else
-# extra_flags := -g
-# build := build/debug
-# endif
+else
+extra_flags := -g
+build := build/debug
+endif
 
 ROOT_DIR := $(PWD)
 PREFIX := $(ROOT_DIR)/$(build)/install
 CFLAGS := -I$(PREFIX)/include $(extra_flags)
-CXXFLAGS = $(CFLAGS) -std=c++11 -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 # -fno-exceptions  -fno-rtti
+CXXFLAGS = $(CFLAGS) -std=c++11 -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 # -fno-exceptions -fno-rtti
 LDFLAGS := -L$(PREFIX)/lib $(extra_flags) # -fno-rtti
 
 prepend = $(foreach a,$(2),$(1)$(a))
@@ -27,24 +26,15 @@ libreqs = $(call libfiles,$($(1)_REQS))
 
 GINACWASM_LIBS := cln ginac
 
-GINAC_VER := 1.8.1
-GINAC_REQS := cln
-GINAC_URL = https://www.ginac.de/ginac-$(1).tar.bz2
-
 EMSDK_VER := 2.0.32
 EMSDK_URL = https://github.com/emscripten-core/emsdk/archive/$(1).tar.gz
 
-# GMP_VER := 6.2.1
-# GMP_CHKSUM := sha-256=fd4829912cddd12f84181c3451cc752be224643e87fac497b69edddadc49b4f2
-# GMP_URL = https://ftp.gnu.org/gnu/gmp/gmp-$(1).tar.xz \
-
-# MPFR_VER := 4.1.0
-# MPFR_CHKSUM := sha-256=0c98a3f1732ff6ca4ea690552079da9c597872d30e96ec28414ee23c95558a7f
-# MPFR_REQS := gmp
-# MPFR_URL = https://ftp.gnu.org/gnu/mpfr/mpfr-$(1).tar.xz
-
 CLN_VER := 1.3.6
 CLN_URL = https://www.ginac.de/CLN/cln-$(1).tar.bz2 \
+
+GINAC_VER := 1.8.1
+GINAC_REQS := cln
+GINAC_URL = https://www.ginac.de/ginac-$(1).tar.bz2
 
 PUBLIC_FILES = $(build)/ginac.js $(build)/ginac.wasm
 
@@ -54,24 +44,16 @@ default: $(PUBLIC_FILES)
 download_tarball = \
     aria2c $(if $($(1)_CHKSUM),--check-integrity=true) --auto-file-renaming=false \
 		$(call $(1)_URL,$($(1)_VER)) --out=$@ $(if $($(1)_CHKSUM),--checksum=$($(1)_CHKSUM))
+lib/cln.tar.bz2:
+	$(call download_tarball,CLN)
 lib/ginac.tar.bz2:
 	$(call download_tarball,GINAC)
 lib/emsdk.tar.gz:
 	$(call download_tarball,EMSDK)
-# lib/gmp.tar.xz:
-# 	$(call download_tarball,GMP)
-# lib/mpfr.tar.xz:
-# 	$(call download_tarball,MPFR)
-lib/cln.tar.bz2:
-	$(call download_tarball,CLN)
 
 untar = tar xmf $< -C $(@D) && rm -rf $@ && mv $@-* $@
 lib/emsdk: lib/emsdk.tar.gz
 	$(untar)
-# lib/gmp: lib/gmp.tar.xz
-# 	$(untar)
-# lib/mpfr: lib/mpfr.tar.xz
-# 	$(untar)
 lib/cln: lib/cln.tar.bz2
 	$(untar)
 lib/ginac: lib/ginac.tar.bz2
@@ -86,21 +68,6 @@ $(ACTIVATE_EMSDK): | lib/emsdk
 
 CD_BUILDDIR = mkdir -p $(@D) && cd $(@D)
 
-# $(build)/gmp/Makefile: $(ACTIVATE_EMSDK) $(call libreqs,GMP) | lib/gmp
-# 	$(EMSDK_ENV)
-# 	$(CD_BUILDDIR)
-# 	emconfigure $(ROOT_DIR)/lib/gmp/configure --host none --prefix="$(PREFIX)" \
-# 		--disable-assembly --disable-cxx --disable-fft \
-# 		--enable-alloca=notreentrant
-
-# $(build)/mpfr/Makefile: $(ACTIVATE_EMSDK) $(call libreqs,MPFR) | lib/mpfr
-# 	$(EMSDK_ENV)
-# 	$(CD_BUILDDIR)
-# 	autoreconf -if -Wall $(ROOT_DIR)/lib/mpfr
-# 	emconfigure $(ROOT_DIR)/lib/mpfr/configure --host none --prefix="$(PREFIX)" \
-# 		--disable-thread-safe --enable-decimal-float=no \
-# 		--with-gmp=$(PREFIX)
-
 $(build)/cln/Makefile: $(ACTIVATE_EMSDK) $(call libreqs,CLN) | lib/cln
 	$(EMSDK_ENV)
 	$(CD_BUILDDIR)
@@ -114,14 +81,6 @@ $(build)/ginac/Makefile: $(ACTIVATE_EMSDK) $(call libreqs,GINAC) | lib/ginac
 	    emconfigure $(ROOT_DIR)/lib/ginac/configure --host none --prefix="$(PREFIX)" PKG_CONFIG_PATH="$(PREFIX)/lib/pkgconfig"
 
 submake_args = -j4 -C $(<D) CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)"
-
-# $(LIBDIR)/libgmp.a: $(build)/gmp/Makefile | lib/gmp
-# 	$(EMSDK_ENV)
-# 	$(MAKE) $(submake_args) install
-
-# $(LIBDIR)/libmpfr.a: $(build)/mpfr/Makefile | lib/mpfr
-# 	$(EMSDK_ENV)
-# 	$(MAKE) $(submake_args) install
 
 $(LIBDIR)/libcln.a: $(build)/cln/Makefile | lib/cln
 	$(EMSDK_ENV)
