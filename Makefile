@@ -104,6 +104,7 @@ $(build)/ginac.js $(build)/ginac.wasm &: $(OBJS) $(call libfiles,$(GINACWASM_LIB
 	emcc \
 	    --bind \
 	    $(LDFLAGS) \
+			-s ENVIRONMENT='web,worker,node' \
 	    -s WARN_UNALIGNED=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s FILESYSTEM=1 -s ASSERTIONS=1 \
 			-s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_lsolve", "_ginac_set_digits"]' \
 			-s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]'\
