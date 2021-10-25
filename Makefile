@@ -109,9 +109,15 @@ $(build)/ginac.js $(build)/ginac.wasm &: $(OBJS) $(call libfiles,$(GINACWASM_LIB
 	    $(OBJS) \
 	    -o $(build)/ginac.js
 
+.PHONY: deploy
+deploy: $(build)/ginac.js $(build)/ginac.wasm
+	mkdir public
+	cp $(build)/ginac.js public/ginac.js
+	cp $(build)/ginac.wasm public/ginac.wasm
+
 .PHONY: clean
 clean:
-	rm -rf $(OBJS) build/
+	rm -rf $(OBJS) build/ public/
 
 .PHONY: clean-deps
 clean-deps:
