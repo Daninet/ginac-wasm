@@ -56,6 +56,8 @@ lib/emsdk: lib/emsdk.tar.gz
 	$(untar)
 lib/cln: lib/cln.tar.bz2
 	$(untar)
+	patch lib/cln/include/cln/object.h patch/cl_word_alignment.patch
+	patch lib/cln/src/timing/cl_t_current2.cc patch/hz.patch
 lib/ginac: lib/ginac.tar.bz2
 	$(untar)
 

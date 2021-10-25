@@ -1,0 +1,11 @@
+--- ./lib/cln-1.3.6/src/timing/cl_t_current2.cc	2009-05-10 23:32:32.000000000 +0300
++++ ./lib/cln/src/timing/cl_t_current2.cc	2021-10-24 14:50:09.778881000 +0300
+@@ -49,7 +49,7 @@
+ 		perror("getrusage");
+ 		result.usertime.tv_sec = 0; result.usertime.tv_nsec = 0;
+ 	}
+-#elif defined(HAVE_SYS_TIMES_H)
++#elif defined(HAVE_SYS_TIMES_H) && defined(HZ)
+ 	var struct tms usage;
+ 	if (times(&usage) != (clock_t)(-1)) {
+ 		// use tms_utime only, ignore tms_stime.
