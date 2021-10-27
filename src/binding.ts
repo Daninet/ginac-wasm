@@ -1,4 +1,4 @@
-import GiNaCModule from "../build/release/ginac";
+import GiNaCModule from "../binding/build/release/ginac";
 import { GiNaCObject } from "./comm";
 
 const utf8decoder = new TextDecoder();
@@ -32,11 +32,16 @@ const makeInstance = (binding: any) => {
 
 let instance: ReturnType<typeof makeInstance> = null;
 
-export const getBinding = async () => {
+export const getBinding = async (wasmPath: string) => {
   if (instance !== null) {
     return instance;
   }
-  const binding = await GiNaCModule();
+  const binding = await GiNaCModule({
+    locateFile: function (path) {
+      console.log("locating", path);
+      return wasmPath;
+    },
+  });
   instance = makeInstance(binding);
   return instance;
 };

@@ -8,6 +8,7 @@ module.exports = {
     fallback: {
       fs: false,
       path: false,
+      crypto: false,
     },
   },
   module: {
@@ -36,6 +37,10 @@ module.exports = {
       {
         test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
         type: 'asset/inline',
+      },
+      {
+        test: /\.wasm$/,
+        type: 'asset/resource',
       },
     ],
   },

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import Gnnn from '../../build/release/ginac';
+import wasmBinary from '../../dist/ginac.wasm';
+import initGiNaC from '../../dist/browser';
 
 export const App = () => {
   const [input, setInput] = useState('');
   useEffect(() => {
     const init = async () => {
-      const GiNaC = await Gnnn();
-      console.log(GiNaC);
+      const GiNaC = await initGiNaC(wasmBinary);
+      console.log(GiNaC(g => g.Pi()).print());
     };
     init();
   }, []);
