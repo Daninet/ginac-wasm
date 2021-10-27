@@ -25,6 +25,7 @@
     "@types/estree": "^0.0.50",
     "@types/node": "^16.4.0",
     "rollup": "^2.53.3",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-license": "^2.5.0",
     "rollup-plugin-terser": "^7.0.2",

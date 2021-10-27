@@ -4,6 +4,7 @@ import { terser } from "rollup-plugin-terser";
 // import gzipPlugin from 'rollup-plugin-gzip';
 import license from "rollup-plugin-license";
 import commonjs from "@rollup/plugin-commonjs";
+import copy from "rollup-plugin-copy";
 
 const TERSER_CONFIG = {
   output: {
@@ -39,6 +40,9 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
     typescript(),
     terser(TERSER_CONFIG),
     license(LICENSE_CONFIG),
+    copy({
+      targets: [{ src: "./binding/build/release/ginac.wasm", dest: "./dist" }],
+    }),
   ],
 };
 
