@@ -5,6 +5,10 @@ module.exports = {
   entry: path.resolve(__dirname, '..', './src/index.tsx'),
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      fs: false,
+      path: false,
+    },
   },
   module: {
     rules: [

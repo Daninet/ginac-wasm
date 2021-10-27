@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
@@ -24,7 +23,6 @@ module.exports = {
         files: './src/**/*.{ts,tsx,js,jsx}',
       },
     }),
-    new ReactRefreshWebpackPlugin(),
     new webpack.DefinePlugin({
       'process.env': '{}',
     }),

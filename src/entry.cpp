@@ -20,7 +20,7 @@ int ioindex = 0;
 
 static std::map<std::string, GiNaC::symbol> symbol_map;
 
-const GiNaC::symbol & get_symbol(const std::string & s) {
+const GiNaC::symbol& get_symbol(const std::string& s) {
   auto i = symbol_map.find(s);
 
   if (i != symbol_map.end()) {
@@ -59,33 +59,35 @@ GiNaC::ex parseSymbol() {
 //   ioindex++;
 // }
 
-#define EXEC_SINGLE_PARAM_FN(FN_NAME, GINAC_FN) { \
-  if (strcmp(name, FN_NAME) == 0) { \
-    auto param = parseType(); \
-    return GINAC_FN(param); \
-  } \
-}
+#define EXEC_SINGLE_PARAM_FN(FN_NAME, GINAC_FN) \
+  {                                             \
+    if (strcmp(name, FN_NAME) == 0) {           \
+      auto param = parseType();                 \
+      return GINAC_FN(param);                   \
+    }                                           \
+  }
 
-#define EXEC_DOUBLE_PARAM_FN(FN_NAME, GINAC_FN) { \
-  if (strcmp(name, FN_NAME) == 0) { \
-    auto param1 = parseType(); \
-    auto param2 = parseType(); \
-    return GINAC_FN(param1, param2); \
-  } \
-}
+#define EXEC_DOUBLE_PARAM_FN(FN_NAME, GINAC_FN) \
+  {                                             \
+    if (strcmp(name, FN_NAME) == 0) {           \
+      auto param1 = parseType();                \
+      auto param2 = parseType();                \
+      return GINAC_FN(param1, param2);          \
+    }                                           \
+  }
 
-#define EXEC_THREE_PARAM_FN(FN_NAME, GINAC_FN) { \
-  if (strcmp(name, FN_NAME) == 0) { \
-    auto param1 = parseType(); \
-    auto param2 = parseType(); \
-    auto param3 = parseType(); \
-    return GINAC_FN(param1, param2, param3); \
-  } \
-}
-
+#define EXEC_THREE_PARAM_FN(FN_NAME, GINAC_FN) \
+  {                                            \
+    if (strcmp(name, FN_NAME) == 0) {          \
+      auto param1 = parseType();               \
+      auto param2 = parseType();               \
+      auto param3 = parseType();               \
+      return GINAC_FN(param1, param2, param3); \
+    }                                          \
+  }
 
 GiNaC::ex parseFunction() {
-  char *name = &iobufferstr[ioindex];
+  char* name = &iobufferstr[ioindex];
   int nameLength = strlen(name);
   ioindex += nameLength + 1;
 
@@ -259,8 +261,7 @@ GiNaC::ex parse() {
 //   console.log('from c', $0, $1, $2)
 // }, iobuffer, iobuffer[0], iobuffer[1]);
 
-
-void print_result(GiNaC::ex &res) {
+void print_result(GiNaC::ex& res) {
   std::ostringstream ss;
   ss << res;
   std::string s = ss.str();
@@ -269,17 +270,13 @@ void print_result(GiNaC::ex &res) {
 }
 
 extern "C" {
-  uint32_t ginac_get_buffer() {
-    return (uint32_t)iobuffer;
-  }
-  
-  void ginac_set_digits(uint32_t digits) {
-    GiNaC::Digits = digits;
-  }
+uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
 
-  void ginac_print() {
-    auto res = parse();
-    print_result(res);
-    symbol_map.clear();
-  }
+void ginac_set_digits(uint32_t digits) { GiNaC::Digits = digits; }
+
+void ginac_print() {
+  auto res = parse();
+  print_result(res);
+  symbol_map.clear();
+}
 }

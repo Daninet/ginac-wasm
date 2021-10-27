@@ -105,6 +105,7 @@ $(build)/ginac.js $(build)/ginac.wasm &: $(OBJS) $(call libfiles,$(GINACWASM_LIB
 	    $(LDFLAGS) \
 			-s ENVIRONMENT='web,worker,node' \
 			-s ALLOW_MEMORY_GROWTH=1 \
+			-s MODULARIZE=1 \
 	    -s WARN_UNALIGNED=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s FILESYSTEM=1 -s ASSERTIONS=0 \
 			-s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_set_digits"]' \
 			--emit-symbol-map \
