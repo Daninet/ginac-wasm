@@ -4,3 +4,5 @@ build
 lib
 *.o
 dist
+src/ginac.wasm
+public

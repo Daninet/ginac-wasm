@@ -96,18 +96,18 @@ OBJS = $(patsubst src/%.cpp,src/%.o,$(wildcard src/*.cpp))
 
 src/%.o: src/%.cpp $(LIBDIR)/libginac.a
 	$(EMSDK_ENV)
-	emcc --bind $(CXXFLAGS) -Oz -c $< -o $@
+	emcc $(CXXFLAGS) -Oz -c $< -o $@
 
 $(build)/ginac.js $(build)/ginac.wasm &: $(OBJS) $(call libfiles,$(GINACWASM_LIBS))
 	$(EMSDK_ENV)
 	mkdir -p $(@D)
 	emcc \
-	    --bind \
 	    $(LDFLAGS) \
 			-s ENVIRONMENT='web,worker,node' \
-	    -s WARN_UNALIGNED=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s FILESYSTEM=1 -s ASSERTIONS=1 \
-			-s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_lsolve", "_ginac_set_digits"]' \
-			-s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]'\
+			-s ALLOW_MEMORY_GROWTH=1 \
+	    -s WARN_UNALIGNED=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s FILESYSTEM=1 -s ASSERTIONS=0 \
+			-s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_set_digits"]' \
+			--emit-symbol-map \
 	    $(call prepend,-l,$(GINACWASM_LIBS)) \
 	    $(OBJS) \
 	    -o $(build)/ginac.js

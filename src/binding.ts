@@ -4,12 +4,14 @@ import { GiNaCObject } from './comm';
 const utf8decoder = new TextDecoder();
 
 const makeInstance = () => {
-  const ginacGetBuffer = GiNaCModule.cwrap('ginac_get_buffer', 'uint32', []);
-  const ginacSetDigits = GiNaCModule.cwrap('ginac_set_digits', null, ['uint32']);
-  const ginacPrint = GiNaCModule.cwrap('ginac_print', null, []);
+  const ginacGetBuffer = GiNaCModule._ginac_get_buffer; // GiNaCModule.cwrap('ginac_get_buffer', 'uint32', []);
+  const ginacSetDigits = GiNaCModule._ginac_set_digits; // GiNaCModule.cwrap('ginac_set_digits', null, ['uint32']);
+  const ginacPrint = GiNaCModule._ginac_print; // GiNaCModule.cwrap('ginac_print', null, []);
 
   const ptr = ginacGetBuffer();
-  const iobuf = new Uint8Array(GiNaCModule.asm.memory.buffer).subarray(ptr, ptr + 65000);
+  console.log(GiNaCModule);
+  // process.exit();
+  const iobuf = GiNaCModule.HEAPU8.subarray(ptr, ptr + 65000);
 
   ginacSetDigits(10);
 

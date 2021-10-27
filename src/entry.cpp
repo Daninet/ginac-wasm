@@ -83,11 +83,11 @@ GiNaC::ex parseSymbol() {
   } \
 }
 
+
 GiNaC::ex parseFunction() {
   char *name = &iobufferstr[ioindex];
   int nameLength = strlen(name);
   ioindex += nameLength + 1;
-
 
   EXEC_SINGLE_PARAM_FN("abs", GiNaC::abs)
   EXEC_SINGLE_PARAM_FN("sqrt", GiNaC::sqrt)
@@ -241,7 +241,6 @@ GiNaC::ex parseType() {
     case 0x15:
       return parseType() >= parseType();
     case 0xA0:
-      printf("Got PI\n");
       return GiNaC::Pi;
     case 0xA1:
       return GiNaC::Euler;
@@ -259,6 +258,7 @@ GiNaC::ex parse() {
 // EM_ASM({
 //   console.log('from c', $0, $1, $2)
 // }, iobuffer, iobuffer[0], iobuffer[1]);
+
 
 void print_result(GiNaC::ex &res) {
   std::ostringstream ss;
@@ -280,14 +280,6 @@ extern "C" {
   void ginac_print() {
     auto res = parse();
     print_result(res);
-    symbol_map.clear();
-  }
-
-  void ginac_lsolve() {
-    auto res = parse();
-    std::string symbol(&iobufferstr[ioindex]);
-    auto evaled = GiNaC::lsolve(res, get_symbol(symbol));
-    print_result(evaled);
     symbol_map.clear();
   }
 }
