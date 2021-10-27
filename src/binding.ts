@@ -1,4 +1,5 @@
 import GiNaCModule from "../binding/build/release/ginac";
+// console.log("m", GiNaCModule);
 import { GiNaCObject } from "./comm";
 
 const utf8decoder = new TextDecoder();

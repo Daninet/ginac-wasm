@@ -20,4 +20,4 @@ export const initGiNaC = async (wasmPath: string) => {
   return GiNaC;
 };
 
-export default initGiNaC;
+// export default initGiNaC;

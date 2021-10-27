@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import wasmBinary from '../../dist/ginac.wasm';
-import initGiNaC from '../../dist/browser';
+import { initGiNaC } from '../../dist/index.esm.min.js';
 
 export const App = () => {
   const [input, setInput] = useState('');

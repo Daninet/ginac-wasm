@@ -1,7 +1,9 @@
-const { initGiNaC } = require("./dist/node");
+const { initGiNaC } = require("./dist/index.umd.min.js");
 
 (async () => {
+  console.log(initGiNaC);
   const GiNaC = await initGiNaC("./dist/ginac.wasm");
+  // console.log(GiNaC);
   console.log(
     // GiNaC(g => g.evalf(g.Ex(g.Pi()))).print()
     GiNaC((g) => g.Pi()).print()
