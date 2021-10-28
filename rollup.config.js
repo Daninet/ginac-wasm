@@ -5,6 +5,7 @@ import { terser } from "rollup-plugin-terser";
 import license from "rollup-plugin-license";
 import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
+// import nodePolyfills from "rollup-plugin-polyfill-node";
 
 const TERSER_CONFIG = {
   output: {
@@ -26,7 +27,7 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
   output: [
     {
       file: "dist/index.umd.min.js",
-      name: "hashwasm",
+      name: "ginac",
       format: "umd",
     },
     {
@@ -36,6 +37,7 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
   ],
   plugins: [
     commonjs(),
+    // nodePolyfills({ include: null }),
     json(),
     typescript(),
     terser(TERSER_CONFIG),

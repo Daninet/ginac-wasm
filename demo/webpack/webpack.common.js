@@ -39,6 +39,10 @@ module.exports = {
         type: 'asset/inline',
       },
       {
+        test: /\.pegjs$/,
+        loader: 'pegjs-loader',
+      },
+      {
         test: /\.wasm$/,
         type: 'asset/resource',
       },
