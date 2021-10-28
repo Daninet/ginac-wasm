@@ -15,7 +15,7 @@ export const App = () => {
 
   return (
     <div style={{ textAlign: 'center', maxWidth: 350, margin: '0 auto' }}>
-      <h2>GiNaC-WASM Web demo</h2>
+      <h2>GiNaC-WASM demo</h2>
       {ginac ? <Calculator ginac={ginac} /> : 'Loading...'}
     </div>
   );

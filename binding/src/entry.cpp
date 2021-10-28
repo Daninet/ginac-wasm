@@ -63,6 +63,7 @@ GiNaC::ex parseSymbol() {
   {                                             \
     if (strcmp(name, FN_NAME) == 0) {           \
       auto param = parseType();                 \
+      ioindex++;                                \
       return GINAC_FN(param);                   \
     }                                           \
   }
@@ -72,6 +73,7 @@ GiNaC::ex parseSymbol() {
     if (strcmp(name, FN_NAME) == 0) {           \
       auto param1 = parseType();                \
       auto param2 = parseType();                \
+      ioindex++;                                \
       return GINAC_FN(param1, param2);          \
     }                                           \
   }
@@ -82,6 +84,7 @@ GiNaC::ex parseSymbol() {
       auto param1 = parseType();               \
       auto param2 = parseType();               \
       auto param3 = parseType();               \
+      ioindex++;                               \
       return GINAC_FN(param1, param2, param3); \
     }                                          \
   }
@@ -116,6 +119,7 @@ GiNaC::ex parseFunction() {
   EXEC_SINGLE_PARAM_FN("factor", GiNaC::factor)
   if (strcmp(name, "factorall") == 0) {
     auto ex1 = parseType();
+    ioindex++;
     return GiNaC::factor(ex1, GiNaC::factor_options::all);
   }
 
@@ -132,6 +136,7 @@ GiNaC::ex parseFunction() {
     auto ex1 = parseType();
     auto ex2 = parseType();
     auto nth = ex_to<GiNaC::numeric>(parseType());
+    ioindex++;
     return GiNaC::coeff(ex1, ex2, nth.to_int());
   }
 
@@ -144,24 +149,28 @@ GiNaC::ex parseFunction() {
     auto ex = parseType();
     auto r = parseType();
     auto order = ex_to<GiNaC::numeric>(parseType());
+    ioindex++;
     return ex.series(r, order.to_int());
   }
 
   if (strcmp(name, "unit") == 0) {
     auto ex1 = parseType();
     auto ex2 = parseType();
+    ioindex++;
     return ex1.unit(ex2);
   }
 
   if (strcmp(name, "content") == 0) {
     auto ex1 = parseType();
     auto ex2 = parseType();
+    ioindex++;
     return ex1.content(ex2);
   }
 
   if (strcmp(name, "primpart") == 0) {
     auto ex1 = parseType();
     auto ex2 = parseType();
+    ioindex++;
     return ex1.primpart(ex2);
   }
 
@@ -169,6 +178,7 @@ GiNaC::ex parseFunction() {
     auto ex1 = parseType();
     auto ex2 = parseType();
     auto ex3 = parseType();
+    ioindex++;
     return ex1.primpart(ex2, ex3);
   }
 
@@ -179,6 +189,7 @@ GiNaC::ex parseFunction() {
   if (strcmp(name, "lsolve") == 0) {
     auto ex = parseType();
     auto symbol = ex_to<GiNaC::symbol>(parseType());
+    ioindex++;
     return GiNaC::lsolve(ex, symbol);
   }
 
@@ -186,6 +197,7 @@ GiNaC::ex parseFunction() {
     auto ex = parseType();
     auto symbol = ex_to<GiNaC::symbol>(parseType());
     auto nth = ex_to<GiNaC::numeric>(parseType());
+    ioindex++;
     return GiNaC::diff(ex, symbol, nth.to_int());
   }
 

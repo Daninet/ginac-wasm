@@ -2,23 +2,30 @@ import { useState } from 'react';
 import { parse } from './parser';
 
 export const Calculator = ({ ginac }) => {
-  const [internalParser, setInternalParser] = useState(true);
+  const [internalParser, setInternalParser] = useState(false);
   const [input, setInput] = useState('');
-  type MathResult = { key: number; input: string; result: string };
+  type MathResult = { key: number; input: string; result: string; time: number };
   const [results, setResults] = useState<MathResult[]>([]);
 
   const onSubmit: React.FormEventHandler = e => {
     e.preventDefault();
     let res = '';
-    if (internalParser) {
-      res = ginac().parsePrint(input);
-    } else {
-      res = ginac(g => {
-        const ast = parse(g, input);
-        console.log(`input="${input} parsed="${ast.toString()}"`);
-        return ast;
-      }).print();
+    const start = performance.now();
+    try {
+      if (internalParser) {
+        res = ginac().parsePrint(input);
+      } else {
+        res = ginac(g => {
+          const ast = parse(g, input);
+          console.log(`input="${input} parsed="${ast.toString()}"`);
+          return ast;
+        }, 1000).print();
+      }
+    } catch (err) {
+      res = 'Error!';
     }
+
+    const end = performance.now();
 
     setResults(prev => [
       ...prev,
@@ -26,6 +33,7 @@ export const Calculator = ({ ginac }) => {
         key: Date.now(),
         input,
         result: res,
+        time: end - start,
       },
     ]);
 
@@ -45,13 +53,13 @@ export const Calculator = ({ ginac }) => {
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
-          style={{ padding: '10px 5px', minWidth: '100%', marginBottom: 20 }}
+          style={{ padding: '6px 3px', minWidth: '100%', marginBottom: 20 }}
         />
       </form>
       <div style={{ textAlign: 'left' }}>
         {results.map(r => (
-          <div key={r.key} style={{ padding: 2 }}>
-            {r.input} = {r.result}
+          <div key={r.key} style={{ padding: 3, wordBreak: 'break-word', margin: '10px 0', background: '#eee' }}>
+            {r.input} <strong>=</strong> {r.result} <strong>({r.time.toFixed(1)} ms)</strong>
           </div>
         ))}
       </div>
