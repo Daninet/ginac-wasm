@@ -9,11 +9,11 @@ export const initGiNaC = async (wasmPath: string) => {
     precision = 10
   ) => {
     binding.setDigits(precision);
-    const ex = fn(GiNaCFactory);
 
     return {
-      print: () => binding.print(ex),
-      debug: () => ex.toString(),
+      parsePrint: (str: string) => binding.parsePrint(str),
+      print: () => binding.print(fn(GiNaCFactory)),
+      debug: () => fn(GiNaCFactory).toString(),
     };
   };
 

@@ -269,10 +269,19 @@ void print_result(GiNaC::ex& res) {
   strcpy(iobufferstr, cstr);
 }
 
+GiNaC::parser reader;
+
 extern "C" {
+
 uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
 
 void ginac_set_digits(uint32_t digits) { GiNaC::Digits = digits; }
+
+void ginac_parse_print() {
+  auto res = reader(iobufferstr);
+  print_result(res);
+  symbol_map.clear();
+}
 
 void ginac_print() {
   auto res = parse();
