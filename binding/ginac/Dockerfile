@@ -9,7 +9,7 @@ RUN wget https://www.ginac.de/ginac-1.8.1.tar.bz2
 RUN tar xmf ginac-1.8.1.tar.bz2
 RUN mkdir -p lib/ginac && mv ginac-1.8.1/* lib/ginac
 
-ENV CFLAGS="-O3 -fexceptions"
+ENV CFLAGS="-O3 -Oz -flto -fexceptions"
 ENV CXXFLAGS="${CFLAGS} -std=c++11"
 ENV CPPFLAGS="${CFLAGS}"
 ENV LDFLAGS="${CFLAGS}"

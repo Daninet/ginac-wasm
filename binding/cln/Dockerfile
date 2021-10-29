@@ -11,7 +11,7 @@ RUN mkdir -p lib/cln && mv cln-1.3.6/* lib/cln
 RUN patch lib/cln/include/cln/object.h patch/cl_word_alignment.patch
 RUN patch lib/cln/src/timing/cl_t_current2.cc patch/hz.patch
 
-ENV CFLAGS="-O3 -Oz -fexceptions"
+ENV CFLAGS="-O3 -Oz -flto -fexceptions"
 ENV CXXFLAGS="${CFLAGS} -std=c++11"
 ENV CPPFLAGS="${CFLAGS} -DNO_ASM"
 ENV LDFLAGS="${CFLAGS}"
