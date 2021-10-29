@@ -195,7 +195,10 @@ GiNaC::ex parseFunction() {
 
   if (strcmp(name, "diff") == 0) {
     auto ex = parseType();
-    auto symbol = ex_to<GiNaC::symbol>(parseType());
+    ioindex++;
+    auto str = parseCString();
+    auto symbol = get_symbol(str);
+    // auto symbol = ex_to<GiNaC::symbol>(parseType());
     auto nth = ex_to<GiNaC::numeric>(parseType());
     ioindex++;
     return GiNaC::diff(ex, symbol, nth.to_int());
@@ -300,4 +303,24 @@ void ginac_print() {
   print_result(res);
   symbol_map.clear();
 }
+}
+
+class registered_functions_hack : public function {
+ public:
+  static const std::vector<function_options>& get_registered_functions() {
+    return function::registered_functions();
+  }
+
+ private:
+  registered_functions_hack();
+  registered_functions_hack(const registered_functions_hack&);
+  registered_functions_hack& operator=(const registered_functions_hack&);
+};
+
+int main() {
+  printf("init %d\n",
+         registered_functions_hack::get_registered_functions().size());
+  for (auto& it : registered_functions_hack::get_registered_functions()) {
+    printf("%s %d\n", it.get_name().c_str(), it.get_nparams());
+  }
 }
