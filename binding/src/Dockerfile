@@ -9,7 +9,7 @@ ENV CFLAGS="-I/builder/dist/include -O3 -Oz -flto -fexceptions"
 ENV CXXFLAGS="${CFLAGS} -std=c++11"
 ENV LDFLAGS="-L/builder/dist/lib ${CFLAGS}"
 
-RUN emcc ${CXXFLAGS} -c src/entry.cpp -o /builder/dist/lib/libginac.a
+RUN emcc ${CXXFLAGS} -c src/entry.cpp -o src/entry.o
 RUN emcc ${LDFLAGS} \
   -s ENVIRONMENT='web,worker,node' \
   -s ALLOW_MEMORY_GROWTH=1 \
@@ -21,4 +21,5 @@ RUN emcc ${LDFLAGS} \
   -s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_parse_print", "_ginac_set_digits", "_main"]' \
   --emit-symbol-map \
   -lcln -lginac \
+  src/entry.o \
   -o /builder/dist/ginac.js
