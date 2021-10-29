@@ -1,10 +1,10 @@
-import typescript from "@rollup/plugin-typescript";
-import json from "@rollup/plugin-json";
-import { terser } from "rollup-plugin-terser";
+import typescript from '@rollup/plugin-typescript';
+import json from '@rollup/plugin-json';
+import { terser } from 'rollup-plugin-terser';
 // import gzipPlugin from 'rollup-plugin-gzip';
-import license from "rollup-plugin-license";
-import commonjs from "@rollup/plugin-commonjs";
-import copy from "rollup-plugin-copy";
+import license from 'rollup-plugin-license';
+import commonjs from '@rollup/plugin-commonjs';
+import copy from 'rollup-plugin-copy';
 // import nodePolyfills from "rollup-plugin-polyfill-node";
 
 const TERSER_CONFIG = {
@@ -15,7 +15,7 @@ const TERSER_CONFIG = {
 
 const LICENSE_CONFIG = {
   banner: {
-    commentStyle: "ignored",
+    commentStyle: 'ignored',
     content: `ginac-wasm (https://www.npmjs.com/package/ginac-wasm)
     (c) Dani Biro
     @license MIT`,
@@ -23,16 +23,16 @@ const LICENSE_CONFIG = {
 };
 
 const MINIFIED_MAIN_BUNDLE_CONFIG = {
-  input: "src/index.ts",
+  input: 'src/index.ts',
   output: [
     {
-      file: "dist/index.umd.min.js",
-      name: "ginac",
-      format: "umd",
+      file: 'dist/index.umd.min.js',
+      name: 'ginac',
+      format: 'umd',
     },
     {
-      file: "dist/index.esm.min.js",
-      format: "es",
+      file: 'dist/index.esm.min.js',
+      format: 'es',
     },
   ],
   plugins: [
@@ -43,7 +43,7 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
     terser(TERSER_CONFIG),
     license(LICENSE_CONFIG),
     copy({
-      targets: [{ src: "./binding/build/release/ginac.wasm", dest: "./dist" }],
+      targets: [{ src: './binding/dist/ginac.wasm', dest: './dist' }],
     }),
   ],
 };

@@ -22,6 +22,7 @@ export const Calculator = ({ ginac }) => {
         }, 1000).print();
       }
     } catch (err) {
+      console.error(err);
       res = 'Error!';
     }
 

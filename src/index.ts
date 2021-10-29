@@ -5,7 +5,7 @@ export const initGiNaC = async (wasmPath: string) => {
   const binding = await getBinding(wasmPath);
 
   const GiNaC = (
-    fn: (c: typeof GiNaCFactory) => GiNaCFactory.GiNaCObject,
+    fn: (c?: typeof GiNaCFactory) => GiNaCFactory.GiNaCObject,
     precision = 10
   ) => {
     binding.setDigits(precision);

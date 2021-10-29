@@ -1,6 +1,6 @@
-import GiNaCModule from "../binding/build/release/ginac";
+import GiNaCModule from '../binding/dist/ginac';
 // console.log("m", GiNaCModule);
-import { GiNaCObject } from "./comm";
+import { GiNaCObject } from './comm';
 
 const utf8decoder = new TextDecoder();
 const utf8encoder = new TextEncoder();
@@ -48,7 +48,7 @@ export const getBinding = async (wasmPath: string) => {
   }
   const binding = await GiNaCModule({
     locateFile: function (path) {
-      console.log("locating", path);
+      console.log('locating', path);
       return wasmPath;
     },
   });
