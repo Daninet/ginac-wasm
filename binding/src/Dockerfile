@@ -13,8 +13,8 @@ ADD ./src /builder/src
 ADD ./ginac/dist /builder/libdist
 
 RUN emcc ${CXXFLAGS} -c src/entry.cpp -o src/entry.o
-RUN mkdir -p /builder/dist
-RUN emcc ${LDFLAGS} \
+RUN mkdir -p /builder/dist && \
+  emcc ${LDFLAGS} \
   -s ENVIRONMENT='web,worker,node' \
   -s ALLOW_MEMORY_GROWTH=1 \
   -s MODULARIZE=1 \
