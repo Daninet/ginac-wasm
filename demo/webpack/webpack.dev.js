@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -22,6 +23,10 @@ module.exports = {
         enabled: true,
         files: './src/**/*.{ts,tsx,js,jsx}',
       },
+    }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, '..', './public/index.html'),
+      publicPath: '/',
     }),
     new webpack.DefinePlugin({
       'process.env': '{}',
