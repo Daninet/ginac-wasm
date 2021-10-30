@@ -1,4 +1,4 @@
-export * from "./functions";
+export * from './functions';
 const utf8encoder = new TextEncoder();
 
 interface GiNaCExType extends ReturnType<typeof ex> {}
@@ -30,7 +30,7 @@ export const symbol = (name: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
-      buf[index++] = 0x04;
+      buf[index++] = 0x03;
       const str = utf8encoder.encode(name);
       buf.set(str, index);
       index += str.length;
@@ -64,27 +64,27 @@ export const relation = (lValue: GiNaCObject) => {
 
   return {
     eq(rValue: GiNaCObject) {
-      return makeResult("==", 0x10, rValue);
+      return makeResult('==', 0x10, rValue);
     },
 
     neq(rValue: GiNaCObject) {
-      return makeResult("!=", 0x11, rValue);
+      return makeResult('!=', 0x11, rValue);
     },
 
     lessThan(rValue: GiNaCObject) {
-      return makeResult("<", 0x12, rValue);
+      return makeResult('<', 0x12, rValue);
     },
 
     lessThanOrEqualTo(rValue: GiNaCObject) {
-      return makeResult("<=", 0x13, rValue);
+      return makeResult('<=', 0x13, rValue);
     },
 
     greaterThan(rValue: GiNaCObject) {
-      return makeResult(">", 0x14, rValue);
+      return makeResult('>', 0x14, rValue);
     },
 
     greaterThanOrEqualTo(rValue: GiNaCObject) {
-      return makeResult(">=", 0x15, rValue);
+      return makeResult('>=', 0x15, rValue);
     },
   };
 };
@@ -96,31 +96,31 @@ export const ex = (lValue: GiNaCObject) => {
   const res = {
     add(val: GiNaCObject) {
       arr.push(val);
-      op.push("+");
+      op.push('+');
       return res;
     },
 
     sub(val: GiNaCObject) {
       arr.push(val);
-      op.push("-");
+      op.push('-');
       return res;
     },
 
     mul(val: GiNaCObject) {
       arr.push(val);
-      op.push("*");
+      op.push('*');
       return res;
     },
 
     div(val: GiNaCObject) {
       arr.push(val);
-      op.push("/");
+      op.push('/');
       return res;
     },
 
     pow(val: GiNaCObject) {
       arr.push(val);
-      op.push("^");
+      op.push('^');
       return res;
     },
 
@@ -129,43 +129,43 @@ export const ex = (lValue: GiNaCObject) => {
 
     and(val: GiNaCObject) {
       arr.push(val);
-      op.push("&");
+      op.push('&');
       return res;
     },
 
     or(val: GiNaCObject) {
       arr.push(val);
-      op.push("|");
+      op.push('|');
       return res;
     },
 
     xor(val: GiNaCObject) {
       arr.push(val);
-      op.push("r");
+      op.push('r');
       return res;
     },
 
     nand(val: GiNaCObject) {
       arr.push(val);
-      op.push("a");
+      op.push('a');
       return res;
     },
 
     nor(val: GiNaCObject) {
       arr.push(val);
-      op.push("o");
+      op.push('o');
       return res;
     },
 
     shiftLeft(val: GiNaCObject) {
       arr.push(val);
-      op.push("<");
+      op.push('<');
       return res;
     },
 
     shiftRight(val: GiNaCObject) {
       arr.push(val);
-      op.push(">");
+      op.push('>');
       return res;
     },
 
@@ -188,7 +188,7 @@ export const ex = (lValue: GiNaCObject) => {
       const parts = op.map((op, index) => {
         return `${op}${arr[index + 1].toString()}`;
       });
-      return `(${arr[0].toString()}${parts.join("")})`;
+      return `(${arr[0].toString()}${parts.join('')})`;
     },
   };
 
@@ -203,7 +203,7 @@ export const Pi = () => {
     },
 
     toString() {
-      return "π";
+      return 'π';
     },
   };
 };
@@ -216,7 +216,7 @@ export const Euler = () => {
     },
 
     toString() {
-      return "γ";
+      return 'γ';
     },
   };
 };
@@ -229,7 +229,7 @@ export const Catalan = () => {
     },
 
     toString() {
-      return "G";
+      return 'G';
     },
   };
 };

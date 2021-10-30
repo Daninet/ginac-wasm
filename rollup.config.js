@@ -1,11 +1,9 @@
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
-// import gzipPlugin from 'rollup-plugin-gzip';
 import license from 'rollup-plugin-license';
 import commonjs from '@rollup/plugin-commonjs';
 import copy from 'rollup-plugin-copy';
-// import nodePolyfills from "rollup-plugin-polyfill-node";
 
 const TERSER_CONFIG = {
   output: {
@@ -18,7 +16,7 @@ const LICENSE_CONFIG = {
     commentStyle: 'ignored',
     content: `ginac-wasm (https://www.npmjs.com/package/ginac-wasm)
     (c) Dani Biro
-    @license MIT`,
+    @license GPL-2.0`,
   },
 };
 
@@ -37,7 +35,6 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
   ],
   plugins: [
     commonjs(),
-    // nodePolyfills({ include: null }),
     json(),
     typescript(),
     terser(TERSER_CONFIG),

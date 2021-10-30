@@ -2,12 +2,15 @@ FROM emscripten/emsdk:2.0.32
 
 WORKDIR /builder
 
-ADD ./src /builder/src
-ADD ./ginac/dist /builder/libdist
-
 ENV CFLAGS="-I/builder/libdist/include -O3 -Oz -flto -fexceptions"
 ENV CXXFLAGS="${CFLAGS} -std=c++11"
 ENV LDFLAGS="-L/builder/libdist/lib ${CFLAGS}"
+
+# warm up emscripten cache
+RUN embuilder.py build MINIMAL --lto
+
+ADD ./src /builder/src
+ADD ./ginac/dist /builder/libdist
 
 RUN emcc ${CXXFLAGS} -c src/entry.cpp -o src/entry.o
 RUN mkdir -p /builder/dist
@@ -19,7 +22,7 @@ RUN emcc ${LDFLAGS} \
   -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
   -s FILESYSTEM=1 \
   -s ASSERTIONS=0 \
-  -s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_parse_print", "_ginac_set_digits", "_main"]' \
+  -s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_parse_print", "_ginac_set_digits"]' \
   --emit-symbol-map \
   -lcln -lginac \
   src/entry.o \

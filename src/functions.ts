@@ -10,7 +10,7 @@ const BaseFn = (name: string, params: GiNaCObject[]) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
-      buf[index++] = 0x03;
+      buf[index++] = 0x20 + params.length;
       const str = utf8encoder.encode(name);
       buf.set(str, index);
       index += str.length;
