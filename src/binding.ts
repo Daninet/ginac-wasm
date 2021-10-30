@@ -1,20 +1,14 @@
 import GiNaCModule from '../binding/dist/ginac';
-// console.log("m", GiNaCModule);
 import { GiNaCObject } from './comm';
 
 const utf8decoder = new TextDecoder();
 const utf8encoder = new TextEncoder();
 
 const makeInstance = (binding: any) => {
-  const ginacGetBuffer = binding._ginac_get_buffer; // binding.cwrap('ginac_get_buffer', 'uint32', []);
-  const ginacSetDigits = binding._ginac_set_digits; // binding.cwrap('ginac_set_digits', null, ['uint32']);
-  const ginacPrint = binding._ginac_print; // binding.cwrap('ginac_print', null, []);
-  const ginacParsePrint = binding._ginac_parse_print; // binding.cwrap('ginac_print', null, []);
-
-  const ptr = ginacGetBuffer();
+  const ptr = binding._ginac_get_buffer();
   const iobuf = binding.HEAPU8.subarray(ptr, ptr + 65000);
 
-  ginacSetDigits(10);
+  binding._ginac_set_digits(10);
 
   const readResponseStr = () => {
     const strEnd = iobuf.indexOf(0);
@@ -23,18 +17,17 @@ const makeInstance = (binding: any) => {
   };
 
   return {
-    setDigits: (digits: number) => ginacSetDigits(digits),
+    setDigits: (digits: number) => binding._ginac_set_digits(digits),
     parsePrint: (input: string) => {
       const str = utf8encoder.encode(input);
       iobuf.set(str, 0);
       iobuf[str.length] = 0;
-      ginacParsePrint();
+      binding._ginac_parse_print();
       return readResponseStr();
     },
     print: (ex: GiNaCObject) => {
       ex.toBuf(iobuf, 0);
-      console.log(iobuf);
-      ginacPrint();
+      binding._ginac_print();
       return readResponseStr();
     },
   };

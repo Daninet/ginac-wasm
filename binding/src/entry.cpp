@@ -47,92 +47,218 @@ GiNaC::ex parseSymbol() {
   return GiNaC::ex(x);
 }
 
+GiNaC::ex parseList() {
+  GiNaC::lst lst;
+  while (iobufferstr[ioindex] != 0) {
+    lst.append(parseType());
+  }
+  ioindex++;
+  return lst;
+}
+
+GiNaC::ex parseMatrix() {
+  int rows = ex_to<GiNaC::numeric>(parseType()).to_int();
+  int cols = ex_to<GiNaC::numeric>(parseType()).to_int();
+  auto lst = ex_to<GiNaC::lst>(parseType());
+  ioindex++;
+  GiNaC::matrix matrix(rows, cols, lst);
+  return matrix;
+}
+
+#define FN_CMP(LEN, PTR, LITERAL) \
+  (((LEN) == sizeof(LITERAL) - 1) && (strcmp((PTR), (LITERAL)) == 0))
+
 GiNaC::ex parseFunction1() {
   char* name = &iobufferstr[ioindex];
-  int nameLength = strlen(name);
-  ioindex += nameLength + 1;
+  size_t len = strlen(name);
+  ioindex += len + 1;
   auto param = parseType();
   if (iobuffer[ioindex++] != 0) exit(1);
 
-  if (strcmp(name, "abs") == 0) return GiNaC::abs(param);
-  if (strcmp(name, "acos") == 0) return GiNaC::acos(param);
-  if (strcmp(name, "acosh") == 0) return GiNaC::acosh(param);
-  if (strcmp(name, "asin") == 0) return GiNaC::asin(param);
-  if (strcmp(name, "asinh") == 0) return GiNaC::asinh(param);
-  if (strcmp(name, "atan") == 0) return GiNaC::atan(param);
-  if (strcmp(name, "atanh") == 0) return GiNaC::atanh(param);
-  if (strcmp(name, "cos") == 0) return GiNaC::cos(param);
-  if (strcmp(name, "cosh") == 0) return GiNaC::cosh(param);
-  if (strcmp(name, "denom") == 0) return GiNaC::normal(param);
-  if (strcmp(name, "eval") == 0) return GiNaC::eval(param);
-  if (strcmp(name, "evalf") == 0) return GiNaC::evalf(param);
-  if (strcmp(name, "exp") == 0) return GiNaC::exp(param);
-  if (strcmp(name, "factor") == 0) return GiNaC::factor(param);
-  if (strcmp(name, "factorial") == 0) return GiNaC::factorial(param);
-  if (strcmp(name, "log") == 0) return GiNaC::log(param);
-  if (strcmp(name, "normal") == 0) return GiNaC::normal(param);
-  if (strcmp(name, "numer_denom") == 0) return GiNaC::normal(param);
-  if (strcmp(name, "numer") == 0) return GiNaC::normal(param);
-  if (strcmp(name, "sin") == 0) return GiNaC::sin(param);
-  if (strcmp(name, "sinh") == 0) return GiNaC::sinh(param);
-  if (strcmp(name, "sqrt") == 0) return GiNaC::sqrt(param);
-  if (strcmp(name, "tan") == 0) return GiNaC::tan(param);
-  if (strcmp(name, "tanh") == 0) return GiNaC::tanh(param);
-
-  if (strcmp(name, "factorall") == 0) {
-    auto ex1 = parseType();
-    ioindex++;
-    return GiNaC::factor(ex1, GiNaC::factor_options::all);
+  if (FN_CMP(len, name, "abs")) return GiNaC::abs(param);
+  if (FN_CMP(len, name, "acos")) return GiNaC::acos(param);
+  if (FN_CMP(len, name, "acosh")) return GiNaC::acosh(param);
+  if (FN_CMP(len, name, "asin")) return GiNaC::asin(param);
+  if (FN_CMP(len, name, "asinh")) return GiNaC::asinh(param);
+  if (FN_CMP(len, name, "atan")) return GiNaC::atan(param);
+  if (FN_CMP(len, name, "atanh")) return GiNaC::atanh(param);
+  if (FN_CMP(len, name, "conjugate")) return GiNaC::conjugate(param);
+  if (FN_CMP(len, name, "cos")) return GiNaC::cos(param);
+  if (FN_CMP(len, name, "cosh")) return GiNaC::cosh(param);
+  if (FN_CMP(len, name, "csgn")) return GiNaC::csgn(param);
+  if (FN_CMP(len, name, "denom")) return GiNaC::denom(param);
+  if (FN_CMP(len, name, "determinant")) {
+    return GiNaC::determinant(ex_to<GiNaC::matrix>(param));
   }
+  if (FN_CMP(len, name, "diag_matrix")) {
+    return GiNaC::diag_matrix(ex_to<GiNaC::lst>(param));
+  }
+  if (FN_CMP(len, name, "EllipticE")) return GiNaC::EllipticE(param);
+  if (FN_CMP(len, name, "EllipticK")) return GiNaC::EllipticK(param);
+  if (FN_CMP(len, name, "eval")) return GiNaC::eval(param);
+  if (FN_CMP(len, name, "evalf")) return GiNaC::evalf(param);
+  if (FN_CMP(len, name, "evalm")) return GiNaC::evalm(param);
+  if (FN_CMP(len, name, "exp")) return GiNaC::exp(param);
+  if (FN_CMP(len, name, "expand")) return GiNaC::expand(param);
+  if (FN_CMP(len, name, "factor")) return GiNaC::factor(param);
+  if (FN_CMP(len, name, "factorall")) {
+    return GiNaC::factor(param, GiNaC::factor_options::all);
+  }
+  if (FN_CMP(len, name, "factorial")) return GiNaC::factorial(param);
+  if (FN_CMP(len, name, "imag_part")) return GiNaC::imag_part(param);
+  if (FN_CMP(len, name, "inverse")) {
+    return GiNaC::inverse(ex_to<GiNaC::matrix>(param));
+  }
+  if (FN_CMP(len, name, "lgamma")) return GiNaC::lgamma(param);
+  if (FN_CMP(len, name, "Li2")) return GiNaC::Li2(param);
+  if (FN_CMP(len, name, "log")) return GiNaC::log(param);
+  if (FN_CMP(len, name, "normal")) return GiNaC::normal(param);
+  if (FN_CMP(len, name, "numer_denom")) return GiNaC::numer_denom(param);
+  if (FN_CMP(len, name, "numer")) return GiNaC::numer(param);
+  if (FN_CMP(len, name, "Order")) return GiNaC::Order(param);
+  if (FN_CMP(len, name, "psi")) return GiNaC::psi(param);
+  if (FN_CMP(len, name, "rank")) {
+    return GiNaC::rank(ex_to<GiNaC::matrix>(param));
+  }
+  if (FN_CMP(len, name, "real_part")) return GiNaC::real_part(param);
+  if (FN_CMP(len, name, "sin")) return GiNaC::sin(param);
+  if (FN_CMP(len, name, "sinh")) return GiNaC::sinh(param);
+  if (FN_CMP(len, name, "sqrt")) return GiNaC::sqrt(param);
+  if (FN_CMP(len, name, "step")) return GiNaC::step(param);
+  if (FN_CMP(len, name, "tan")) return GiNaC::tan(param);
+  if (FN_CMP(len, name, "tanh")) return GiNaC::tanh(param);
+  if (FN_CMP(len, name, "tgamma")) return GiNaC::tgamma(param);
+  if (FN_CMP(len, name, "trace")) {
+    return GiNaC::trace(ex_to<GiNaC::matrix>(param));
+  }
+  if (FN_CMP(len, name, "zeta")) return GiNaC::zeta(param);
 
   exit(1);
 }
 
 GiNaC::ex parseFunction2() {
   char* name = &iobufferstr[ioindex];
-  int nameLength = strlen(name);
-  ioindex += nameLength + 1;
+  size_t len = strlen(name);
+  ioindex += len + 1;
   auto param1 = parseType();
   auto param2 = parseType();
   if (iobuffer[ioindex++] != 0) exit(1);
 
-  if (strcmp(name, "atan2") == 0) return GiNaC::atan2(param1, param2);
-  if (strcmp(name, "content") == 0) return param1.content(param2);
-  if (strcmp(name, "degree") == 0) return GiNaC::degree(param1, param2);
-  if (strcmp(name, "gcd") == 0) return GiNaC::gcd(param1, param2);
-  if (strcmp(name, "lcm") == 0) return GiNaC::lcm(param1, param2);
-  if (strcmp(name, "ldegree") == 0) return GiNaC::ldegree(param1, param2);
-  if (strcmp(name, "lsolve") == 0)
+  if (FN_CMP(len, name, "atan2")) return GiNaC::atan2(param1, param2);
+  if (FN_CMP(len, name, "beta")) return GiNaC::beta(param1, param2);
+  if (FN_CMP(len, name, "binomial")) return GiNaC::binomial(param1, param2);
+  if (FN_CMP(len, name, "charpoly")) {
+    return GiNaC::charpoly(ex_to<GiNaC::matrix>(param1), param2);
+  }
+  if (FN_CMP(len, name, "collect")) return GiNaC::collect(param1, param2);
+  if (FN_CMP(len, name, "content")) return param1.content(param2);
+  if (FN_CMP(len, name, "degree")) return GiNaC::degree(param1, param2);
+  if (FN_CMP(len, name, "eta")) return GiNaC::eta(param1, param2);
+  if (FN_CMP(len, name, "G")) return GiNaC::G(param1, param2);
+  if (FN_CMP(len, name, "gcd")) return GiNaC::gcd(param1, param2);
+  if (FN_CMP(len, name, "H")) return GiNaC::H(param1, param2);
+  if (FN_CMP(len, name, "iterated_integral")) {
+    return GiNaC::iterated_integral(param1, param2);
+  }
+  if (FN_CMP(len, name, "lcm")) return GiNaC::lcm(param1, param2);
+  if (FN_CMP(len, name, "ldegree")) return GiNaC::ldegree(param1, param2);
+  if (FN_CMP(len, name, "Li")) return GiNaC::Li(param1, param2);
+  if (FN_CMP(len, name, "lsolve")) {
     return GiNaC::lsolve(param1, ex_to<GiNaC::symbol>(param2));
-  if (strcmp(name, "primpart") == 0) return param1.primpart(param2);
-  if (strcmp(name, "unit") == 0) return param1.unit(param2);
+  }
+  if (FN_CMP(len, name, "pow")) return GiNaC::pow(param1, param2);
+  if (FN_CMP(len, name, "primpart")) return param1.primpart(param2);
+  if (FN_CMP(len, name, "psi2")) return GiNaC::psi(param1, param2);
+  if (FN_CMP(len, name, "subs")) return GiNaC::subs(param1, param2);
+  if (FN_CMP(len, name, "unit")) return param1.unit(param2);
+  if (FN_CMP(len, name, "unit_matrix")) {
+    return GiNaC::unit_matrix(ex_to<GiNaC::numeric>(param1).to_int(),
+                              ex_to<GiNaC::numeric>(param2).to_int());
+  }
+  if (FN_CMP(len, name, "zeta2")) return GiNaC::zeta(param1, param2);
+  if (FN_CMP(len, name, "zetaderiv")) return GiNaC::zetaderiv(param1, param2);
 
   exit(1);
 }
 
 GiNaC::ex parseFunction3() {
   char* name = &iobufferstr[ioindex];
-  int nameLength = strlen(name);
-  ioindex += nameLength + 1;
+  size_t len = strlen(name);
+  ioindex += len + 1;
   auto param1 = parseType();
   auto param2 = parseType();
   auto param3 = parseType();
   if (iobuffer[ioindex++] != 0) exit(1);
 
-  if (strcmp(name, "coeff") == 0)
+  if (FN_CMP(len, name, "coeff")) {
     return GiNaC::coeff(param1, param2, ex_to<GiNaC::numeric>(param3).to_int());
-  if (strcmp(name, "quo") == 0) return GiNaC::quo(param1, param2, param3);
-  if (strcmp(name, "rem") == 0) return GiNaC::rem(param1, param2, param3);
-  if (strcmp(name, "prem") == 0) return GiNaC::prem(param1, param2, param3);
-  if (strcmp(name, "divide") == 0) return GiNaC::divide(param1, param2, param3);
-  if (strcmp(name, "series") == 0)
-    return param1.series(param2, ex_to<GiNaC::numeric>(param3).to_int());
-  if (strcmp(name, "resultant") == 0)
-    return GiNaC::resultant(param1, param2, param3);
-  if (strcmp(name, "diff") == 0)
+  }
+  if (FN_CMP(len, name, "diff")) {
     return GiNaC::diff(param1, ex_to<GiNaC::symbol>(param2),
                        ex_to<GiNaC::numeric>(param3).to_int());
-  if (strcmp(name, "primpart3") == 0) return param1.primpart(param2, param3);
+  }
+  if (FN_CMP(len, name, "divide")) return GiNaC::divide(param1, param2, param3);
+  if (FN_CMP(len, name, "G3")) return GiNaC::G(param1, param2, param3);
+  if (FN_CMP(len, name, "iterated_integral3")) {
+    return GiNaC::iterated_integral(param1, param2, param3);
+  }
+  if (FN_CMP(len, name, "prem")) return GiNaC::prem(param1, param2, param3);
+  if (FN_CMP(len, name, "primpart3")) return param1.primpart(param2, param3);
+  if (FN_CMP(len, name, "quo")) return GiNaC::quo(param1, param2, param3);
+  if (FN_CMP(len, name, "rem")) return GiNaC::rem(param1, param2, param3);
+  if (FN_CMP(len, name, "reduced_matrix")) {
+    return GiNaC::reduced_matrix(ex_to<GiNaC::matrix>(param1),
+                                 ex_to<GiNaC::numeric>(param2).to_int(),
+                                 ex_to<GiNaC::numeric>(param3).to_int());
+  }
+  if (FN_CMP(len, name, "resultant")) {
+    return GiNaC::resultant(param1, param2, param3);
+  }
+  if (FN_CMP(len, name, "S")) return GiNaC::S(param1, param2, param3);
+  if (FN_CMP(len, name, "series")) {
+    return param1.series(param2, ex_to<GiNaC::numeric>(param3).to_int());
+  }
+
+  exit(1);
+}
+
+GiNaC::ex parseFunction4() {
+  char* name = &iobufferstr[ioindex];
+  size_t len = strlen(name);
+  ioindex += len + 1;
+  auto param1 = parseType();
+  auto param2 = parseType();
+  auto param3 = parseType();
+  auto param4 = parseType();
+  if (iobuffer[ioindex++] != 0) exit(1);
+
+  if (FN_CMP(len, name, "fsolve")) {
+    return GiNaC::fsolve(param1, ex_to<GiNaC::symbol>(param2),
+                         ex_to<GiNaC::numeric>(param3),
+                         ex_to<GiNaC::numeric>(param4));
+  }
+
+  exit(1);
+}
+
+GiNaC::ex parseFunction5() {
+  char* name = &iobufferstr[ioindex];
+  size_t len = strlen(name);
+  ioindex += len + 1;
+  auto param1 = parseType();
+  auto param2 = parseType();
+  auto param3 = parseType();
+  auto param4 = parseType();
+  auto param5 = parseType();
+  if (iobuffer[ioindex++] != 0) exit(1);
+
+  if (FN_CMP(len, name, "sub_matrix")) {
+    return GiNaC::sub_matrix(ex_to<GiNaC::matrix>(param1),
+                             ex_to<GiNaC::numeric>(param2).to_int(),
+                             ex_to<GiNaC::numeric>(param3).to_int(),
+                             ex_to<GiNaC::numeric>(param4).to_int(),
+                             ex_to<GiNaC::numeric>(param5).to_int());
+  }
 
   exit(1);
 }
@@ -155,9 +281,6 @@ GiNaC::ex parseExpression() {
       case '/':
         res /= parseType();
         break;
-      case '^':
-        res = GiNaC::pow(res, parseType());
-        break;
     }
   }
   ioindex++;
@@ -173,6 +296,10 @@ GiNaC::ex parseType() {
       return parseNumber();
     case 0x03:
       return parseSymbol();
+    case 0x04:
+      return parseList();
+    case 0x05:
+      return parseMatrix();
     case 0x10:
       return parseType() == parseType();
     case 0x11:
@@ -191,6 +318,10 @@ GiNaC::ex parseType() {
       return parseFunction2();
     case 0x23:
       return parseFunction3();
+    case 0x24:
+      return parseFunction4();
+    case 0x25:
+      return parseFunction5();
     case 0xA0:
       return GiNaC::Pi;
     case 0xA1:

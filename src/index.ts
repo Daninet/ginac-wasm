@@ -1,13 +1,10 @@
-import { getBinding } from "./binding";
-import * as GiNaCFactory from "./comm";
+import { getBinding } from './binding';
+import * as GiNaCFactory from './comm';
 
 export const initGiNaC = async (wasmPath: string) => {
   const binding = await getBinding(wasmPath);
 
-  const GiNaC = (
-    fn: (c?: typeof GiNaCFactory) => GiNaCFactory.GiNaCObject,
-    precision = 10
-  ) => {
+  const GiNaC = (fn: (c?: typeof GiNaCFactory) => GiNaCFactory.GiNaCObject, precision = 10) => {
     binding.setDigits(precision);
 
     return {
@@ -20,4 +17,6 @@ export const initGiNaC = async (wasmPath: string) => {
   return GiNaC;
 };
 
-// export default initGiNaC;
+export const getFactory = () => {
+  return GiNaCFactory;
+};

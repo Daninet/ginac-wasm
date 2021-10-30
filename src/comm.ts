@@ -4,6 +4,7 @@ const utf8encoder = new TextEncoder();
 interface GiNaCExType extends ReturnType<typeof ex> {}
 export type GiNaCObject =
   | {
+      type: 'numeric' | 'symbol' | 'lst' | 'matrix' | 'relation' | 'ex';
       toBuf(buf: Uint8Array, index: number): number;
       toString(): string;
     }
@@ -11,6 +12,7 @@ export type GiNaCObject =
 
 export const numeric = (num: string) => {
   return {
+    type: 'numeric',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x02;
@@ -28,6 +30,7 @@ export const numeric = (num: string) => {
 
 export const symbol = (name: string) => {
   return {
+    type: 'symbol',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x03;
@@ -44,9 +47,75 @@ export const symbol = (name: string) => {
   };
 };
 
+export const lst = (items: GiNaCObject[]) => {
+  if (!Array.isArray(items)) {
+    throw new Error('Items needs to be an array!');
+  }
+
+  return {
+    type: 'lst',
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x04;
+
+      for (let i = 0; i < items.length; i++) {
+        index += items[i].toBuf(buf, index);
+      }
+
+      buf[index++] = 0x00;
+
+      return index - originalIndex;
+    },
+
+    toString() {
+      return `{${items.map(item => item.toString()).join(', ')}}`;
+    },
+  };
+};
+
+export const matrix = (rows: number, columns: number, items: GiNaCObject[]) => {
+  if (!Number.isInteger(rows) || !Number.isInteger(columns)) {
+    throw new Error('Matrix rows and columns number needs to be integers');
+  }
+
+  if (rows < 1 || columns < 1) {
+    throw new Error('Invalid matrix size');
+  }
+
+  if (!Array.isArray(items)) {
+    throw new Error('Matrix list needs to be an array!');
+  }
+
+  if (rows * columns !== items.length) {
+    throw new Error('Invalid item list size');
+  }
+
+  return {
+    type: 'matrix',
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x05;
+      index += numeric(rows.toString()).toBuf(buf, index);
+      index += numeric(columns.toString()).toBuf(buf, index);
+      index += lst(items).toBuf(buf, index);
+      buf[index++] = 0x00;
+      return index - originalIndex;
+    },
+
+    toString() {
+      const chunked = [...Array(Math.ceil(items.length / columns))].map((_, i) =>
+        items.slice(i * columns, i * columns + columns),
+      );
+      const rows = chunked.map(r => `[${r.map(i => i.toString()).join(', ')}]`);
+      return `[${rows.join(', ')}]`;
+    },
+  };
+};
+
 export const relation = (lValue: GiNaCObject) => {
   const makeResult = (op: string, opVal: number, rValue: GiNaCObject) => {
     return {
+      type: 'relation',
       toBuf(buf: Uint8Array, index: number) {
         const originalIndex = index;
         index += lValue.toBuf(buf, index);
@@ -94,6 +163,8 @@ export const ex = (lValue: GiNaCObject) => {
   const op: string[] = [];
 
   const res = {
+    type: 'ex',
+
     add(val: GiNaCObject) {
       arr.push(val);
       op.push('+');
@@ -197,6 +268,7 @@ export const ex = (lValue: GiNaCObject) => {
 
 export const Pi = () => {
   return {
+    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa0;
       return 1;
@@ -210,6 +282,7 @@ export const Pi = () => {
 
 export const Euler = () => {
   return {
+    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa1;
       return 1;
@@ -223,6 +296,7 @@ export const Euler = () => {
 
 export const Catalan = () => {
   return {
+    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa2;
       return 1;
