@@ -5,4 +5,4 @@ set -e
 cd "${0%/*}"
 
 docker build -f src/Dockerfile . --tag=ginac-binding-builder
-docker run -it -v $(pwd):/output ginac-binding-builder cp -R /builder/dist /output
+docker run --rm -v $(pwd):/output ginac-binding-builder cp -R /builder/dist /output

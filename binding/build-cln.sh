@@ -5,4 +5,4 @@ set -e
 cd "${0%/*}"
 
 docker build -f cln/Dockerfile . --tag=cln-builder
-docker run -it -v $(pwd)/cln:/output cln-builder cp -R /builder/dist /output
+docker run --rm -v $(pwd)/cln:/output cln-builder cp -R /builder/dist /output

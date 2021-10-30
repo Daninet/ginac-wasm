@@ -18,8 +18,20 @@ jobs:
         with:
           node-version: '14.x'
 
-      - name: Build code
-        run: npm run build
+      - name: Build CLN
+        run: npm run build-cln
+
+      - name: Build GiNaC
+        run: npm run build-ginac
+
+      - name: Build src
+        run: npm run build-src
+
+      - name: Build JS library
+        run: npm run build-rollup
+
+      - name: Build Typescript types
+        run: npm run build-types
 
       - name: Deploy to 'binaries' branch
         if: success()
