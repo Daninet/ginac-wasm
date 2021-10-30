@@ -27,10 +27,13 @@ jobs:
       - name: Build src
         run: npm run build-src
 
+      - name: Install JS dependencies
+        run: npm ci
+
       - name: Build JS library
         run: npm run build-rollup
 
-      - name: Build Typescript types
+      - name: Build TypeScript types
         run: npm run build-types
 
       - name: Deploy to 'binaries' branch
@@ -43,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Demo frontend
-        run: cd demo && npm run build && cd ..
+        run: cd demo && npm ci && npm run build && cd ..
 
       - name: Deploy to 'gh-pages' branch
         if: success()
