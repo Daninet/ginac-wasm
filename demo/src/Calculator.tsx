@@ -1,30 +1,16 @@
 import { useState } from 'react';
-import { parse } from './parser';
+import { solve } from './parser/solver';
 
-export const Calculator = ({ ginac }) => {
+export const Calculator = ({}) => {
   const [internalParser, setInternalParser] = useState(false);
   const [input, setInput] = useState('');
   type MathResult = { key: number; input: string; result: string; time: number };
   const [results, setResults] = useState<MathResult[]>([]);
 
-  const onSubmit: React.FormEventHandler = e => {
+  const onSubmit: React.FormEventHandler = async e => {
     e.preventDefault();
-    let res = '';
     const start = performance.now();
-    try {
-      if (internalParser) {
-        res = ginac().parsePrint(input);
-      } else {
-        res = ginac(g => {
-          const ast = parse(g, input);
-          console.log(`input="${input} parsed="${ast.toString()}"`);
-          return ast;
-        }, 1000).print();
-      }
-    } catch (err) {
-      console.error(err);
-      res = 'Error!';
-    }
+    const res = await solve(internalParser, input);
 
     const end = performance.now();
 

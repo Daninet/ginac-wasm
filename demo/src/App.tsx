@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
-import wasmBinary from '../../dist/ginac.wasm';
-import { initGiNaC } from '../../dist/index.esm.min.js';
 import { Calculator } from './Calculator';
+import { initSolver } from './parser/solver';
 
 export const App = () => {
-  const [ginac, setGinac] = useState();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const GiNaC = await initGiNaC(wasmBinary);
-      setGinac(() => GiNaC);
+      await initSolver();
+      setReady(true);
     })();
   }, []);
 
   return (
     <div style={{ textAlign: 'center', maxWidth: 350, margin: '0 auto' }}>
       <h2>GiNaC-WASM demo</h2>
-      {ginac ? <Calculator ginac={ginac} /> : 'Loading...'}
+      {ready ? <Calculator /> : 'Loading...'}
     </div>
   );
 };
