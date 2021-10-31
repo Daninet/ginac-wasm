@@ -9,7 +9,7 @@ evalf(pi_approx)`;
 
 export const Calculator = ({}) => {
   const [input, setInput] = useState(DEMO_NOTEBOOK);
-  type MathResult = { key: number; inputs: string[]; results: string[]; time: number };
+  type MathResult = { error?: string; inputs?: string[]; results?: string[]; time: number };
   const [result, setResult] = useState<MathResult>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,12 +22,15 @@ export const Calculator = ({}) => {
       const results = await solve(lines);
       const end = performance.now();
 
-      setResult({
-        key: Date.now(),
-        inputs: lines,
-        results,
-        time: end - start,
-      });
+      if (typeof results === 'string') {
+        setResult({ error: results, time: end - start });
+      } else {
+        setResult({
+          inputs: lines,
+          results,
+          time: end - start,
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -47,7 +50,7 @@ export const Calculator = ({}) => {
         }}
       >
         &apos;<span style={{ color: '#030e0d' }}>{result.inputs[index]}</span>&apos;<strong>&nbsp;=&nbsp;</strong>&apos;
-        <span style={{ color: '#ff0000' }}>{result.results[index]}</span>&apos;
+        <span style={{ color: '#378100' }}>{result.results[index]}</span>&apos;
       </div>
     );
   };
@@ -68,7 +71,14 @@ export const Calculator = ({}) => {
       <div style={{ textAlign: 'left' }}>
         {result ? (
           <>
-            {result.results.map((_, index) => printResult(index))}
+            {result.error ? (
+              <span style={{ color: '#ff0000' }}>
+                {result.error}
+                <br />
+              </span>
+            ) : (
+              result.results.map((_, index) => printResult(index))
+            )}
             <strong>Executed in {result.time.toFixed(1)} ms</strong>
           </>
         ) : null}

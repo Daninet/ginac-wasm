@@ -10,24 +10,35 @@ let GiNaC = null;
   postMessage('init');
 })();
 
+const parseLines = (lines: string[]) => {
+  const prevValues: Record<string, number> = {};
+  const asts = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const parseResult = parse(line, prevValues);
+    if (parseResult.error) {
+      throw new Error(`Cannot parse line "${line}"`);
+    }
+    const { id, expr } = parseResult.ast;
+    if (id) {
+      prevValues[id] = i;
+    }
+    asts.push(expr);
+  }
+  return asts;
+};
+
 (self as any).onmessage = e => {
   // console.log('worker got message', e);
   const { lines } = e.data;
   let res = [];
 
-  const prevValues: Record<string, number> = {};
   try {
-    const asts = lines.map((line, index) => {
-      const { id, expr } = parse(line, prevValues);
-      if (id) {
-        prevValues[id] = index;
-      }
-      return expr;
-    });
+    const asts = parseLines(lines);
     res = GiNaC.print(asts);
   } catch (err) {
     console.error(err);
-    res = ['Error!'];
+    res = err.message ?? 'Evaluation error';
   }
   self.postMessage(res);
 };

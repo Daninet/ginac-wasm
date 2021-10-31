@@ -6,9 +6,13 @@
 
 
 start
-  = _ line:statement? _ {
-    return line;
+  = _ line:statement? _ comment:comment? {
+    return line ?? { expr: g.numeric('0') };
   }
+
+
+comment
+  = ('#' / '//' / '\\\\') text:$(.*)
 
 
 statement
@@ -218,12 +222,7 @@ factor
 
 
 parantheses_expression
-  = s:('(' / '[' / '{') _ expr:expression _ e:(')' / ']' / '}') & {
-    if (s === '(') return e === ')';
-    if (s === '[') return e === ']';
-    if (s === '{') return e === '}';
-    return false;
-  } {
+  = '(' _ expr:expression _ ')' {
     return g.ex(expr);
   }
 
@@ -235,6 +234,39 @@ value
       return g.mul(id, g.numeric('-1'));
     }
     return id;
+  }
+  / list_value
+  / matrix_value
+
+
+list_value
+  = '{' _ head:expression tail:( _ ',' _ expression _ )* _ '}' {
+    const params = unroll(head, tail, 3);
+    return g.lst(params);
+  }
+
+
+matrix_value
+  = '[' _ head:matrix_row tail:( _ ',' _ matrix_row _ )* _ ']' {
+    const rows = unroll(head, tail, 3);
+    const numColumns = Math.max(...rows.map(i => i.length));
+    const listItems = [];
+    rows.forEach(row => {
+      listItems.push(...row);
+      if (row.length < numColumns) {
+        const rem = numColumns - row.length;
+        const remItems = [...new Array(rem)].map(() => g.numeric('0'));
+        listItems.push(...remItems);
+      }
+    });
+    return g.matrix(rows.length, numColumns, listItems);
+  }
+
+
+matrix_row
+  = '[' _ head:expression tail:( _ ',' _ expression _ )* _ ']' {
+    const params = unroll(head, tail, 3);
+    return params;
   }
 
 

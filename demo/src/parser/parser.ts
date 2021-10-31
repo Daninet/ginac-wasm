@@ -25,5 +25,5 @@ export function parse(str: string, prevValues: Record<string, number>) {
     }
   }
 
-  return result.ast;
+  return result;
 }
