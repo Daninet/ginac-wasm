@@ -128,8 +128,9 @@ export const numer_denom = (ex: GiNaCObject) => {
   return BaseFn('numer_denom', [ex]);
 };
 
-export const series = (ex: GiNaCObject, r: GiNaCObject, order: number) => {
-  return BaseFn('series', [ex, r, numeric(order.toString())] as GiNaCObject[]);
+export const series = (ex: GiNaCObject, r: GiNaCObject, order: GiNaCObject | number) => {
+  const orderParam = typeof order === 'number' ? numeric(order.toString()) : order;
+  return BaseFn('series', [ex, r, orderParam] as GiNaCObject[]);
 };
 
 export const abs = (ex: GiNaCObject) => {
@@ -380,6 +381,10 @@ export const trace = (ex: GiNaCObject) => {
 export const rank = (ex: GiNaCObject) => {
   if (ex.type !== 'matrix') throw new Error('rank() requires a matrix parameter');
   return BaseFn('rank', [ex]);
+};
+
+export const series_to_poly = (ex: GiNaCObject) => {
+  return BaseFn('series_to_poly', [ex]);
 };
 
 export const solve = () => {

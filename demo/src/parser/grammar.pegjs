@@ -12,7 +12,10 @@ start
 
 
 statement
-  = id:$id _ '=' _ expr:expression {
+  = 'digits' _ '=' _ num:base10_digits {
+    return { expr: g.digits(Number(num)) };
+  }
+  / id:$id _ '=' _ expr:expression {
     return { id, expr };
   }
   / expr:expression {
@@ -182,7 +185,7 @@ function
 
 
 function_name
-  = [a-z]+ {
+  = [a-z_]+ {
     return text();
 }
 

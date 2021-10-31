@@ -141,6 +141,7 @@ GiNaC::ex parseFunction1() {
     return GiNaC::rank(ex_to<GiNaC::matrix>(param));
   }
   if (FN_CMP(len, name, "real_part")) return GiNaC::real_part(param);
+  if (FN_CMP(len, name, "series_to_poly")) return GiNaC::series_to_poly(param);
   if (FN_CMP(len, name, "sin")) return GiNaC::sin(param);
   if (FN_CMP(len, name, "sinh")) return GiNaC::sinh(param);
   if (FN_CMP(len, name, "sqrt")) return GiNaC::sqrt(param);

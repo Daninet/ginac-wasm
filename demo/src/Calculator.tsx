@@ -1,24 +1,37 @@
 import { useState } from 'react';
 import { solve } from './parser/solver';
 
+const DEMO_NOTEBOOK = `digits = 10
+degree = 22
+pi_expansion = series_to_poly(series(atan(x), x, degree))
+pi_approx = 16*subs(pi_expansion, x==(1/5)) - 4*subs(pi_expansion, x==(1/239))
+evalf(pi_approx)`;
+
 export const Calculator = ({}) => {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(DEMO_NOTEBOOK);
   type MathResult = { key: number; inputs: string[]; results: string[]; time: number };
   const [result, setResult] = useState<MathResult>(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit: React.FormEventHandler = async e => {
     e.preventDefault();
-    const start = performance.now();
-    const lines = input.split('\n').filter(x => !!x.trim());
-    const results = await solve(lines);
-    const end = performance.now();
+    setLoading(true);
+    try {
+      const start = performance.now();
+      const lines = input.split('\n').filter(x => !!x.trim());
+      const results = await solve(lines);
+      const end = performance.now();
 
-    setResult({
-      key: Date.now(),
-      inputs: lines,
-      results,
-      time: end - start,
-    });
+      setResult({
+        key: Date.now(),
+        inputs: lines,
+        results,
+        time: end - start,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
   };
 
   const printResult = (index: number) => {
@@ -33,7 +46,8 @@ export const Calculator = ({}) => {
           fontFamily: 'monospace',
         }}
       >
-        {result.inputs[index]} <strong>=</strong> {result.results[index]}
+        &apos;<span style={{ color: '#030e0d' }}>{result.inputs[index]}</span>&apos;<strong>&nbsp;=&nbsp;</strong>&apos;
+        <span style={{ color: '#ff0000' }}>{result.results[index]}</span>&apos;
       </div>
     );
   };
@@ -47,8 +61,8 @@ export const Calculator = ({}) => {
           onChange={e => setInput(e.target.value)}
           style={{ padding: '6px 3px', minWidth: '100%', marginBottom: 10, fontFamily: 'monospace' }}
         />
-        <button type="submit" style={{ padding: '6px 20px', marginBottom: 20 }}>
-          Evaluate
+        <button disabled={loading} type="submit" style={{ padding: '6px 20px', marginBottom: 20 }}>
+          {loading ? 'Loading...' : 'Evaluate'}
         </button>
       </form>
       <div style={{ textAlign: 'left' }}>
