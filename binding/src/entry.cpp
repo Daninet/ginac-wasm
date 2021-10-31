@@ -49,6 +49,8 @@ GiNaC::ex parseDigits() {
   return digits;
 }
 
+GiNaC::ex parseExpression() { return GiNaC::ex(parseType()); }
+
 GiNaC::ex parseNumber() {
   auto str = parseCString();
   GiNaC::numeric x(str.c_str());
@@ -337,7 +339,7 @@ GiNaC::ex parseType() {
   ioindex++;
   switch (iobuffer[ioindex - 1]) {
     case 0x01:
-      return parseRef();
+      return parseExpression();
     case 0x02:
       return parseNumber();
     case 0x03:
@@ -346,6 +348,8 @@ GiNaC::ex parseType() {
       return parseList();
     case 0x05:
       return parseMatrix();
+    case 0x06:
+      return parseRef();
     case 0x0F:
       return parseDigits();
     case 0x21:
@@ -426,6 +430,7 @@ void ginac_print() {
   GiNaC::Digits = 17;
   auto lst = parse();
   print_result_list(lst);
+  expressions.remove_all();
   symbol_map.clear();
 }
 }

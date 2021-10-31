@@ -156,7 +156,7 @@ export const ref = (refIndex: number) => {
     type: 'ref',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
-      buf[index++] = 0x01;
+      buf[index++] = 0x06;
       index += numeric(refIndex.toString()).toBuf(buf, index);
       return index - originalIndex;
     },
@@ -179,6 +179,22 @@ export const digits = (digits: number) => {
 
     toString() {
       return 'digits()';
+    },
+  };
+};
+
+export const ex = (ex: GiNaCObject) => {
+  return {
+    type: 'expression',
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x01;
+      index += ex.toBuf(buf, index);
+      return index - originalIndex;
+    },
+
+    toString() {
+      return `ex(${ex.toString()})`;
     },
   };
 };

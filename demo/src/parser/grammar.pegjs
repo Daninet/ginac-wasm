@@ -1,13 +1,22 @@
 {
   const unroll = options.util.makeUnroll(location, options);
   const g = options.g;
+  const prevValues = options.prevValues;
 }
 
 
 start
-  = _ line:(expression)? _ {
-    console.log(line.toString());
+  = _ line:statement? _ {
     return line;
+  }
+
+
+statement
+  = id:$id _ '=' _ expr:expression {
+    return { id, expr };
+  }
+  / expr:expression {
+    return { expr };
   }
 
 
@@ -22,20 +31,19 @@ relation
     if (!rel) return exprl;
     const op = rel[1];
     const exprr = rel[3];
-    const ret = g.relation(exprl);
     switch(op) {
       case '==':
-        return ret.eq(exprr);
+        return g.equal(exprl, exprr);
       case '<=':
-        return ret.lessThanOrEqualTo(exprr);
+        return g.lessThanOrEqualTo(exprl, exprr);
       case '<':
-        return ret.lessThan(exprr);
+        return g.lessThan(exprl, exprr);
       case '>':
-        return ret.greaterThan(exprr);
+        return g.greaterThan(exprl, exprr);
       case '>=':
-        return ret.greaterThanOrEqualTo(exprr);
+        return g.greaterThanOrEqualTo(exprl, exprr);
       case '!=':
-        return ret.neq(exprr);
+        return g.notEqual(exprl, exprr);
     }
   }
 
@@ -49,9 +57,9 @@ bitwise_or
   = head:bitwise_xor tail:(_ ('|' / 'or') _ bitwise_xor)* {
     if (tail.length === 0) return head;
     const values = unroll(head, tail, 3);
-    const ret = g.ex(values.shift());
+    let ret = values.shift();
     values.forEach((op, index) => {
-      ret.or(values[index + 1]);
+      ret = g.or(ret, values[index + 1]);
     });
     return ret;
   }
@@ -61,9 +69,9 @@ bitwise_xor
   = head:bitwise_and tail:(_ 'xor' _ bitwise_and)* {
     if (tail.length === 0) return head;
     const values = unroll(head, tail, 3);
-    const ret = g.ex(values.shift());
+    let ret = values.shift();
     values.forEach((op, index) => {
-      ret.xor(values[index + 1]);
+      ret = g.xor(ret, values[index + 1]);
     });
     return ret;
   }
@@ -73,9 +81,9 @@ bitwise_and
   = head:bitshift tail:(_ ('&' / 'and') _ bitshift)* {
     if (tail.length === 0) return head;
     const values = unroll(head, tail, 3);
-    const ret = g.ex(values.shift());
+    let ret = values.shift();
     values.forEach((op, index) => {
-      ret.and(values[index + 1]);
+      ret = g.and(ret, values[index + 1]);
     });
     return ret;
   }
@@ -85,12 +93,12 @@ bitshift
     if (tail.length === 0) return head;
     const operators = unroll(null, tail, 1);
     const values = unroll(head, tail, 3);
-    const ret = g.ex(values[0]);
+    let ret = values[0];
     operators.forEach((op, index) => {
       if (op === '<<') {
-        ret.shiftLeft(values[index + 1]);
+        ret = g.shiftLeft(ret, values[index + 1]);
       } else {
-        ret.shiftRight(values[index + 1]);
+        ret = g.shiftRight(ret, values[index + 1]);
       }
     });
     return ret;
@@ -102,12 +110,12 @@ sum
     if (tail.length === 0) return head;
     const operators = unroll(null, tail, 1);
     const values = unroll(head, tail, 3);
-    const ret = g.ex(values[0]);
+    let ret = values[0];
     operators.forEach((op, index) => {
       if (op === '+') {
-        ret.add(values[index + 1]);
+        ret = g.add(ret, values[index + 1]);
       } else {
-        ret.sub(values[index + 1]);
+        ret = g.sub(ret, values[index + 1]);
       }
     });
     return ret;
@@ -118,9 +126,13 @@ product
   = head:exponential tail:product_tail* {
     if (tail.length === 0) return head;
 
-    const ret = g.ex(head);
+    let ret = head;
     tail.forEach(([op, expr]) => {
-      ret[op](expr);
+      if (op === '*') {
+        ret = g.mul(ret, expr);
+      } else {
+        ret = g.div(ret, expr);
+      }
     });
 
     return ret;
@@ -128,17 +140,13 @@ product
 
 
 product_op
-  = '*' {
-    return 'mul';
-  }
-  / '/' {
-    return 'div';
-  }
+  = '*'
+  / '/'
 
 
 product_tail
   = _ !([^([{a-zA-Z]) expr:exponential {
-    return ['mul', expr];
+    return ['*', expr];
   }
   / _ op:product_op _ expr:exponential {
     return [op, expr];
@@ -149,9 +157,9 @@ exponential
   = head:bitwise_not tail:(_ ('^' / '**') _ bitwise_not)* {
     if (tail.length === 0) return head;
     const params = unroll(head, tail, 3);
-    let ret = g.ex(params[params.length - 2]).pow(params[params.length - 1]);
-    for (let i = params.length - 3; i >= 0; i--) {
-      ret = g.ex(params[i]).pow(ret);
+    let ret = params[params.length - 1];
+    for (let i = params.length - 2; i >= 0; i--) {
+      ret = g.pow(params[i], ret);
     }
     return ret;
   }
@@ -159,7 +167,7 @@ exponential
 
 bitwise_not
   = ('~' / 'not') _ factor:factor {
-    return g.ex(factor).not(); // ast('Not').add(factor);
+    return g.not(factor);
   }
   / factor
 
@@ -191,13 +199,13 @@ function_parameters
 factor
   = negative:negative_sign fn:function {
     if (negative) {
-      return g.ex(fn).mul(g.numeric('-1'));
+      return g.mul(fn, g.numeric('-1'));
     }
     return fn;
   }
   / negative:negative_sign expr:parantheses_expression {
     if (negative) {
-      return g.ex(fn).mul(g.numeric('-1'));
+      return g.mul(fn, g.numeric('-1'));
     }
     return expr;
   }
@@ -221,7 +229,7 @@ value
   = numeric_value
   / negative:negative_sign id:id {
     if (negative) {
-      return g.ex(id).mul(g.numeric('-1'));
+      return g.mul(id, g.numeric('-1'));
     }
     return id;
   }
@@ -278,6 +286,9 @@ negative_sign
 
 id
   = id:$([a-zA-Z_][a-zA-Z0-9_]*) {
+    if (prevValues[id] !== undefined) {
+      return g.ref(prevValues[id]);
+    }
     return g.symbol(id);
   }
 

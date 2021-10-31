@@ -1,16 +1,19 @@
 import PEGUtil from 'pegjs-util';
 import Tracer from 'pegjs-backtrace';
 import parser from './grammar.pegjs';
+import { getFactory } from '../../../dist/index.esm.min';
 
-const TRACE_AST = true;
+const TRACE_AST = false;
+const g = getFactory();
 
-export function parse(g, str: string) {
+export function parse(str: string, prevValues: Record<string, number>) {
   const tracer = TRACE_AST ? new Tracer(str) : undefined;
 
   const result = PEGUtil.parse(parser, str, {
     startRule: 'start',
     ...(tracer ? { tracer } : {}),
     g,
+    prevValues,
   });
 
   if (result.error !== null) {
@@ -21,8 +24,6 @@ export function parse(g, str: string) {
       throw new Error(`ERROR: Parsing Failure:\n${PEGUtil.errorMessage(result.error, true).replace(/^/gm, 'ERROR: ')}`);
     }
   }
-
-  console.log(result.ast.toString());
 
   return result.ast;
 }

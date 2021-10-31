@@ -19,9 +19,9 @@ export const initSolver = () => {
   });
 };
 
-export const solve = (internal: boolean, str: string) => {
-  return new Promise<string>(resolve => {
+export const solve = (lines: string[]) => {
+  return new Promise<string[]>(resolve => {
     promises.push(resolve);
-    solverworker.postMessage({ internal, str });
+    solverworker.postMessage({ lines });
   });
 };

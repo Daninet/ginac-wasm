@@ -13,7 +13,7 @@ export const App = () => {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', maxWidth: 350, margin: '0 auto' }}>
+    <div style={{ margin: 30 }}>
       <h2>GiNaC-WASM demo</h2>
       {ready ? <Calculator /> : 'Loading...'}
     </div>

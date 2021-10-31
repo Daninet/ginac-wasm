@@ -12,22 +12,22 @@ let GiNaC = null;
 
 (self as any).onmessage = e => {
   // console.log('worker got message', e);
-  const { internal, str } = e.data;
-  let res = '';
+  const { lines } = e.data;
+  let res = [];
 
+  const prevValues: Record<string, number> = {};
   try {
-    if (internal) {
-      res = GiNaC().parsePrint(str);
-    } else {
-      res = GiNaC(g => {
-        const ast = parse(g, str);
-        console.log(`input="${str} parsed="${ast.toString()}"`);
-        return ast;
-      }, 1000).print();
-    }
+    const asts = lines.map((line, index) => {
+      const { id, expr } = parse(line, prevValues);
+      if (id) {
+        prevValues[id] = index;
+      }
+      return expr;
+    });
+    res = GiNaC.print(asts);
   } catch (err) {
     console.error(err);
-    res = 'Error!';
+    res = ['Error!'];
   }
   self.postMessage(res);
 };
