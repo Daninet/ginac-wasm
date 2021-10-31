@@ -6,27 +6,41 @@ const utf8encoder = new TextEncoder();
 
 const makeInstance = (binding: any) => {
   const ptr = binding._ginac_get_buffer();
-  const iobuf = binding.HEAPU8.subarray(ptr, ptr + 65000);
-
-  binding._ginac_set_digits(10);
+  const iobuf = binding.HEAPU8.subarray(ptr, ptr + 65536) as Uint8Array;
+  const ioview = new DataView(iobuf.buffer, iobuf.byteOffset, iobuf.byteLength);
 
   const readResponseStr = () => {
-    const strEnd = iobuf.indexOf(0);
-    const str = utf8decoder.decode(iobuf.subarray(0, strEnd));
-    return str;
+    const res = [];
+    let read = 0;
+    while (true) {
+      const strSize = ioview.getUint32(read, true);
+      if (strSize === 0) break;
+      read += 4;
+      const str = utf8decoder.decode(iobuf.subarray(read, read + strSize));
+      read += strSize;
+      res.push(str);
+    }
+    return res;
   };
 
   return {
-    setDigits: (digits: number) => binding._ginac_set_digits(digits),
-    parsePrint: (input: string) => {
-      const str = utf8encoder.encode(input);
-      iobuf.set(str, 0);
-      iobuf[str.length] = 0;
+    parsePrint: (inputs: string[]) => {
+      let written = 0;
+      inputs.forEach(str => {
+        const buf = utf8encoder.encode(str);
+        iobuf.set(buf, written);
+        iobuf[buf.length + written] = 0;
+        written += buf.length + 1;
+      });
       binding._ginac_parse_print();
       return readResponseStr();
     },
-    print: (ex: GiNaCObject) => {
-      ex.toBuf(iobuf, 0);
+    print: (exs: GiNaCObject[]) => {
+      let written = 0;
+      exs.forEach(ex => {
+        written += ex.toBuf(iobuf, written);
+      });
+      iobuf[written] = 0;
       binding._ginac_print();
       return readResponseStr();
     },

@@ -4,15 +4,16 @@ import * as GiNaCFactory from './comm';
 export const initGiNaC = async (wasmPath: string) => {
   const binding = await getBinding(wasmPath);
 
-  const GiNaC = (fn: (c?: typeof GiNaCFactory) => GiNaCFactory.GiNaCObject, precision = 10) => {
-    binding.setDigits(precision);
-
-    return {
-      parsePrint: (str: string) => binding.parsePrint(str),
-      print: () => binding.print(fn(GiNaCFactory)),
-      debug: () => fn(GiNaCFactory).toString(),
-    };
+  const GiNaC = {
+    parsePrint: (arr: string[] | string) => {
+      return binding.parsePrint(Array.isArray(arr) ? arr : [arr]);
+    },
+    print: (arr: GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
+      return binding.print(Array.isArray(arr) ? arr : [arr]);
+    },
   };
+
+  // binding.setDigits(precision);
 
   return GiNaC;
 };

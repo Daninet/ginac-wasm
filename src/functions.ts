@@ -2,7 +2,7 @@ import { GiNaCObject, numeric, symbol } from './comm';
 
 const utf8encoder = new TextEncoder();
 
-const BaseFn = (name: string, params: GiNaCObject[]) => {
+const BaseFn = (name: string, params: GiNaCObject[]): GiNaCObject => {
   if (params.some(p => p === undefined)) {
     throw new Error(`Missing parameters at ${name}`);
   }
@@ -389,4 +389,76 @@ export const solve = () => {
 export const inverse = (ex: GiNaCObject) => {
   if (ex.type !== 'matrix') throw new Error('inverse() requires a matrix parameter');
   return BaseFn('inverse', [ex]);
+};
+
+export const add = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('add', [ex1, ex2]);
+};
+
+export const sub = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('sub', [ex1, ex2]);
+};
+
+export const mul = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('mul', [ex1, ex2]);
+};
+
+export const div = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('div', [ex1, ex2]);
+};
+
+export const not = (ex1: GiNaCObject) => {
+  return BaseFn('not', [ex1]);
+};
+
+export const and = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('and', [ex1, ex2]);
+};
+
+export const or = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('or', [ex1, ex2]);
+};
+
+export const xor = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('xor', [ex1, ex2]);
+};
+
+export const nand = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('nand', [ex1, ex2]);
+};
+
+export const nor = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('nor', [ex1, ex2]);
+};
+
+export const shiftLeft = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('shiftLeft', [ex1, ex2]);
+};
+
+export const shiftRight = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('shiftRight', [ex1, ex2]);
+};
+
+export const equal = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('equal', [ex1, ex2]);
+};
+
+export const notEqual = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('notEqual', [ex1, ex2]);
+};
+
+export const lessThan = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('lessThan', [ex1, ex2]);
+};
+
+export const lessThanOrEqualTo = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('lessThanOrEqualTo', [ex1, ex2]);
+};
+
+export const greaterThan = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('greaterThan', [ex1, ex2]);
+};
+
+export const greaterThanOrEqualTo = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('greaterThanOrEqualTo', [ex1, ex2]);
 };

@@ -1,4 +1,5 @@
 // #include <iostream>
+#include <cln/integer.h>
 #include <emscripten.h>
 #include <ginac/ginac.h>
 
@@ -9,7 +10,7 @@
 using namespace GiNaC;
 // using namespace emscripten;
 
-volatile uint8_t iobuffer_raw[65000] = {0};
+volatile uint8_t iobuffer_raw[65536] = {0};
 uint8_t* iobuffer = (uint8_t*)iobuffer_raw;
 char* iobufferstr = (char*)iobuffer_raw;
 
@@ -33,6 +34,19 @@ std::string parseCString() {
   std::string str(&iobufferstr[ioindex]);
   ioindex += str.length() + 1;
   return str;
+}
+
+GiNaC::lst expressions;
+
+GiNaC::ex parseRef() {
+  auto index = GiNaC::ex_to<GiNaC::numeric>(parseType()).to_int();
+  return expressions[index];
+}
+
+GiNaC::ex parseDigits() {
+  auto digits = GiNaC::ex_to<GiNaC::numeric>(parseType());
+  GiNaC::Digits = digits.to_int();
+  return digits;
 }
 
 GiNaC::ex parseNumber() {
@@ -113,6 +127,10 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "Li2")) return GiNaC::Li2(param);
   if (FN_CMP(len, name, "log")) return GiNaC::log(param);
   if (FN_CMP(len, name, "normal")) return GiNaC::normal(param);
+  if (FN_CMP(len, name, "not")) {
+    auto num = GiNaC::ex_to<GiNaC::numeric>(param).to_cl_N();
+    return GiNaC::numeric(cln::lognot(cln::the<cln::cl_I>(num)));
+  }
   if (FN_CMP(len, name, "numer_denom")) return GiNaC::numer_denom(param);
   if (FN_CMP(len, name, "numer")) return GiNaC::numer(param);
   if (FN_CMP(len, name, "Order")) return GiNaC::Order(param);
@@ -144,6 +162,13 @@ GiNaC::ex parseFunction2() {
   auto param2 = parseType();
   if (iobuffer[ioindex++] != 0) exit(1);
 
+  if (FN_CMP(len, name, "add")) return param1 + param2;
+  if (FN_CMP(len, name, "and")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(
+        cln::logand(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
+  }
   if (FN_CMP(len, name, "atan2")) return GiNaC::atan2(param1, param2);
   if (FN_CMP(len, name, "beta")) return GiNaC::beta(param1, param2);
   if (FN_CMP(len, name, "binomial")) return GiNaC::binomial(param1, param2);
@@ -153,27 +178,72 @@ GiNaC::ex parseFunction2() {
   if (FN_CMP(len, name, "collect")) return GiNaC::collect(param1, param2);
   if (FN_CMP(len, name, "content")) return param1.content(param2);
   if (FN_CMP(len, name, "degree")) return GiNaC::degree(param1, param2);
+  if (FN_CMP(len, name, "div")) return param1 / param2;
   if (FN_CMP(len, name, "eta")) return GiNaC::eta(param1, param2);
+  if (FN_CMP(len, name, "equal")) return param1 == param2;
   if (FN_CMP(len, name, "G")) return GiNaC::G(param1, param2);
   if (FN_CMP(len, name, "gcd")) return GiNaC::gcd(param1, param2);
+  if (FN_CMP(len, name, "greaterThan")) return param1 > param2;
+  if (FN_CMP(len, name, "greaterThanOrEqualTo")) return param1 >= param2;
   if (FN_CMP(len, name, "H")) return GiNaC::H(param1, param2);
   if (FN_CMP(len, name, "iterated_integral")) {
     return GiNaC::iterated_integral(param1, param2);
   }
   if (FN_CMP(len, name, "lcm")) return GiNaC::lcm(param1, param2);
   if (FN_CMP(len, name, "ldegree")) return GiNaC::ldegree(param1, param2);
+  if (FN_CMP(len, name, "lessThan")) return param1 < param2;
+  if (FN_CMP(len, name, "lessThanOrEqualTo")) return param1 <= param2;
   if (FN_CMP(len, name, "Li")) return GiNaC::Li(param1, param2);
   if (FN_CMP(len, name, "lsolve")) {
     return GiNaC::lsolve(param1, ex_to<GiNaC::symbol>(param2));
   }
+  if (FN_CMP(len, name, "mul")) return param1 * param2;
+  if (FN_CMP(len, name, "nand")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(
+        cln::lognand(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
+  }
+  if (FN_CMP(len, name, "nor")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(
+        cln::lognor(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
+  }
+  if (FN_CMP(len, name, "notEqual")) return param1 != param2;
+  if (FN_CMP(len, name, "or")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(
+        cln::logior(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
+  }
   if (FN_CMP(len, name, "pow")) return GiNaC::pow(param1, param2);
   if (FN_CMP(len, name, "primpart")) return param1.primpart(param2);
   if (FN_CMP(len, name, "psi2")) return GiNaC::psi(param1, param2);
+  if (FN_CMP(len, name, "shiftLeft")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(cln::the<cln::cl_I>(num1)
+                          << cln::the<cln::cl_I>(num2));
+  }
+  if (FN_CMP(len, name, "shiftRight")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(cln::the<cln::cl_I>(num1) >>
+                          cln::the<cln::cl_I>(num2));
+  }
+  if (FN_CMP(len, name, "sub")) return param1 - param2;
   if (FN_CMP(len, name, "subs")) return GiNaC::subs(param1, param2);
   if (FN_CMP(len, name, "unit")) return param1.unit(param2);
   if (FN_CMP(len, name, "unit_matrix")) {
     return GiNaC::unit_matrix(ex_to<GiNaC::numeric>(param1).to_int(),
                               ex_to<GiNaC::numeric>(param2).to_int());
+  }
+  if (FN_CMP(len, name, "xor")) {
+    auto num1 = GiNaC::ex_to<GiNaC::numeric>(param1).to_cl_N();
+    auto num2 = GiNaC::ex_to<GiNaC::numeric>(param2).to_cl_N();
+    return GiNaC::numeric(
+        cln::logxor(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
   }
   if (FN_CMP(len, name, "zeta2")) return GiNaC::zeta(param1, param2);
   if (FN_CMP(len, name, "zetaderiv")) return GiNaC::zetaderiv(param1, param2);
@@ -263,35 +333,11 @@ GiNaC::ex parseFunction5() {
   exit(1);
 }
 
-GiNaC::ex parseExpression() {
-  GiNaC::ex res(parseType());
-
-  while (iobuffer[ioindex] != 0) {
-    char op = iobuffer[ioindex++];
-    switch (op) {
-      case '+':
-        res += parseType();
-        break;
-      case '-':
-        res -= parseType();
-        break;
-      case '*':
-        res *= parseType();
-        break;
-      case '/':
-        res /= parseType();
-        break;
-    }
-  }
-  ioindex++;
-  return res;
-}
-
 GiNaC::ex parseType() {
   ioindex++;
   switch (iobuffer[ioindex - 1]) {
     case 0x01:
-      return parseExpression();
+      return parseRef();
     case 0x02:
       return parseNumber();
     case 0x03:
@@ -300,18 +346,8 @@ GiNaC::ex parseType() {
       return parseList();
     case 0x05:
       return parseMatrix();
-    case 0x10:
-      return parseType() == parseType();
-    case 0x11:
-      return parseType() != parseType();
-    case 0x12:
-      return parseType() < parseType();
-    case 0x13:
-      return parseType() <= parseType();
-    case 0x14:
-      return parseType() > parseType();
-    case 0x15:
-      return parseType() >= parseType();
+    case 0x0F:
+      return parseDigits();
     case 0x21:
       return parseFunction1();
     case 0x22:
@@ -329,43 +365,67 @@ GiNaC::ex parseType() {
     case 0xA2:
       return GiNaC::Catalan;
   }
-  return GiNaC::ex(0);
+
+  exit(1);
 }
 
-GiNaC::ex parse() {
+GiNaC::lst parse() {
   ioindex = 0;
-  return parseType();
+  while (iobuffer[ioindex] != 0) {
+    auto res = parseType();
+    expressions.append(res);
+  }
+  return expressions;
 }
 
 // EM_ASM({
 //   console.log('from c', $0, $1, $2)
 // }, iobuffer, iobuffer[0], iobuffer[1]);
 
-void print_result(GiNaC::ex& res) {
+size_t print_result(GiNaC::ex& res, size_t index) {
   std::ostringstream ss;
   ss << res;
   std::string s = ss.str();
+  size_t str_size = s.size();
+  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
+  *size_ptr = str_size;
   const char* cstr = s.c_str();
-  strcpy(iobufferstr, cstr);
+  memcpy(iobufferstr + index + 4, cstr, str_size);
+  return 4 + str_size;
 }
 
-GiNaC::parser reader;
+void print_result_list(GiNaC::lst& lst) {
+  size_t index = 0;
+  for (lst::const_iterator i = lst.begin(); i != lst.end(); ++i) {
+    auto ex = *i;
+    index += print_result(ex, index);
+  }
+  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
+  *size_ptr = 0;
+}
 
 extern "C" {
 
 uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
 
-void ginac_set_digits(uint32_t digits) { GiNaC::Digits = digits; }
-
 void ginac_parse_print() {
-  auto res = reader(iobufferstr);
-  print_result(res);
-  symbol_map.clear();
+  GiNaC::Digits = 17;
+  GiNaC::parser reader;
+  GiNaC::lst lst;
+  size_t index = 0;
+  while (iobufferstr[index] != 0) {
+    size_t len = strlen(iobufferstr + index);
+    auto res = reader(iobufferstr + index);
+    lst.append(res);
+    index += len + 1;
+  }
+  print_result_list(lst);
 }
 
 void ginac_print() {
-  auto res = parse();
-  print_result(res);
+  GiNaC::Digits = 17;
+  auto lst = parse();
+  print_result_list(lst);
   symbol_map.clear();
 }
 }
