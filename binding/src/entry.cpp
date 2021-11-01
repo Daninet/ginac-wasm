@@ -156,6 +156,10 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "series_to_poly")) return GiNaC::series_to_poly(param);
   if (FN_CMP(len, name, "sin")) return GiNaC::sin(param);
   if (FN_CMP(len, name, "sinh")) return GiNaC::sinh(param);
+  if (FN_CMP(len, name, "sort")) {
+    auto lst = try_ex_to<GiNaC::lst>(param);
+    return lst.sort();
+  }
   if (FN_CMP(len, name, "sqrt")) return GiNaC::sqrt(param);
   if (FN_CMP(len, name, "step")) return GiNaC::step(param);
   if (FN_CMP(len, name, "tan")) return GiNaC::tan(param);
@@ -163,6 +167,10 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "tgamma")) return GiNaC::tgamma(param);
   if (FN_CMP(len, name, "trace")) {
     return GiNaC::trace(try_ex_to<GiNaC::matrix>(param));
+  }
+  if (FN_CMP(len, name, "unique")) {
+    auto lst = try_ex_to<GiNaC::lst>(param);
+    return lst.unique();
   }
   if (FN_CMP(len, name, "zeta")) return GiNaC::zeta(param);
 
@@ -177,12 +185,31 @@ GiNaC::ex parseFunction2() {
   auto param2 = parseType();
   ioindex++;
 
-  if (FN_CMP(len, name, "add")) return param1 + param2;
+  if (FN_CMP(len, name, "add")) {
+    if (is_a<GiNaC::lst>(param1) && is_a<GiNaC::lst>(param2)) {
+      GiNaC::lst sum;
+      for (GiNaC::const_iterator i = param1.begin(); i != param1.end(); ++i) {
+        sum.append(*i);
+      }
+      for (GiNaC::const_iterator i = param2.begin(); i != param2.end(); ++i) {
+        sum.append(*i);
+      }
+      return sum;
+    }
+    return param1 + param2;
+  }
   if (FN_CMP(len, name, "and")) {
     auto num1 = try_ex_to<GiNaC::numeric>(param1).to_cl_N();
     auto num2 = try_ex_to<GiNaC::numeric>(param2).to_cl_N();
     return GiNaC::numeric(
         cln::logand(cln::the<cln::cl_I>(num1), cln::the<cln::cl_I>(num2)));
+  }
+  if (FN_CMP(len, name, "at")) {
+    auto lst = try_ex_to<GiNaC::lst>(param1);
+    auto pos = try_ex_to<GiNaC::numeric>(param2).to_int();
+    auto abs_pos = pos < 0 ? -pos : pos;
+    if (abs_pos > lst.nops() - 1) throw "Out of bounds";
+    return lst[pos < 0 ? lst.nops() + pos : pos];
   }
   if (FN_CMP(len, name, "atan2")) return GiNaC::atan2(param1, param2);
   if (FN_CMP(len, name, "beta")) return GiNaC::beta(param1, param2);

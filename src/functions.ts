@@ -540,3 +540,15 @@ export const has = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 export const find = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('find', [ex1, ex2]);
 };
+
+export const at = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('at', [ex1, ex2]);
+};
+
+export const sort = (ex: GiNaCObject) => {
+  return BaseFn('sort', [ex]);
+};
+
+export const unique = (ex: GiNaCObject) => {
+  return BaseFn('unique', [ex]);
+};

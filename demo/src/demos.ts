@@ -42,6 +42,17 @@ lb=.45359237*kg
 200*lb/in^2`.trim(),
   },
   {
+    name: 'Lists',
+    text: `
+{x, 2, y, x+y}
+{1, 2} + {3, 4, 5}
+sort({4, 3, 1, 2})
+at({sin(x), cos(x), sin(x) + cos(x)}, 1)
+at({1, 2, 3, 4}, -1)
+unique({1, 1, 2, 3, 2, 2})
+`.trim(),
+  },
+  {
     name: 'Numeric functions',
     text: `
 inverse(3)
