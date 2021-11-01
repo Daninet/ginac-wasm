@@ -321,6 +321,18 @@ negative_sign
 
 id
   = id:$([a-zA-Z_][a-zA-Z0-9_]*) {
+    if (['Pi', 'pi'].includes(id)) {
+      return g.Pi();
+    }
+    if (['Catalan', 'catalan'].includes(id)) {
+      return g.Catalan();
+    }
+    if (['Euler', 'euler'].includes(id)) {
+      return g.Euler();
+    }
+    if (['I','i'].includes(id)) {
+      return g.I();
+    }
     if (prevValues[id] !== undefined) {
       return g.ref(prevValues[id]);
     }

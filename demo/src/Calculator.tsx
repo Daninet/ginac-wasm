@@ -1,20 +1,16 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { DEMOS } from './demos';
 import { solve } from './parser/solver';
 
-const DEMO_NOTEBOOK = `digits = 10
-degree = 22
-pi_expansion = series_to_poly(series(atan(x), x, degree))
-pi_approx = 16*subs(pi_expansion, x==(1/5)) - 4*subs(pi_expansion, x==(1/239))
-evalf(pi_approx)`;
-
 export const Calculator = ({}) => {
-  const [input, setInput] = useState(DEMO_NOTEBOOK);
+  const [demoName, setDemoName] = useState('Estimate PI');
+  const [input, setInput] = useState('');
+  const [modified, setModified] = useState(false);
   type MathResult = { error?: string; inputs?: string[]; results?: string[]; time: number };
   const [result, setResult] = useState<MathResult>(null);
   const [loading, setLoading] = useState(false);
 
-  const onSubmit: React.FormEventHandler = async e => {
-    e.preventDefault();
+  const onCalculate = useCallback(async (input: string) => {
     setLoading(true);
     try {
       const start = performance.now();
@@ -35,6 +31,18 @@ export const Calculator = ({}) => {
       console.error(err);
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    setModified(false);
+    const newInput = DEMOS.find(d => d.name === demoName).text;
+    setInput(newInput);
+    onCalculate(newInput);
+  }, [demoName, onCalculate]);
+
+  const onSubmit: React.FormEventHandler = async e => {
+    e.preventDefault();
+    onCalculate(input);
   };
 
   const printResult = (index: number) => {
@@ -43,14 +51,16 @@ export const Calculator = ({}) => {
         key={result.inputs[index] + result.results[index] + Date.now()}
         style={{
           padding: 3,
-          wordBreak: 'break-word',
-          margin: '10px 0',
           background: '#eee',
           fontFamily: 'monospace',
         }}
       >
-        &apos;<span style={{ color: '#030e0d' }}>{result.inputs[index]}</span>&apos;<strong>&nbsp;=&nbsp;</strong>&apos;
-        <span style={{ color: '#378100' }}>{result.results[index]}</span>&apos;
+        <span style={{ color: '#030e0d', wordBreak: 'break-word' }}>
+          {'>>'} {result.inputs[index]}
+        </span>
+        <br />
+        <span style={{ color: '#378100', wordBreak: 'break-word' }}>{result.results[index]}</span>
+        <br />
       </div>
     );
   };
@@ -58,17 +68,37 @@ export const Calculator = ({}) => {
   return (
     <>
       <form onSubmit={onSubmit}>
+        <div style={{ marginBottom: 10 }}>
+          Demo: {/* eslint-disable-next-line jsx-a11y/no-onchange */}
+          <select value={demoName} onChange={e => setDemoName(e.currentTarget.value)}>
+            {DEMOS.map(d => (
+              <option key={d.name} value={d.name}>
+                {demoName === d.name && modified ? `( ${d.name} )` : d.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <textarea
-          rows={5}
+          rows={8}
           value={input}
-          onChange={e => setInput(e.target.value)}
-          style={{ padding: '6px 3px', minWidth: '100%', marginBottom: 10, fontFamily: 'monospace' }}
+          onChange={e => {
+            setInput(e.target.value);
+            setModified(true);
+          }}
+          onKeyPress={e => (e.ctrlKey && e.code === 'Enter' ? onCalculate(input) : void 0)}
+          style={{
+            padding: '6px 3px',
+            minWidth: '100%',
+            marginBottom: 10,
+            fontFamily: "'Inconsolata', monospace",
+            lineHeight: 1.3,
+          }}
         />
         <button disabled={loading} type="submit" style={{ padding: '6px 20px', marginBottom: 20 }}>
           {loading ? 'Loading...' : 'Evaluate'}
         </button>
       </form>
-      <div style={{ textAlign: 'left' }}>
+      <div style={{ textAlign: 'left', fontFamily: "'Inconsolata', monospace" }}>
         {result ? (
           <>
             {result.error ? (
@@ -79,10 +109,12 @@ export const Calculator = ({}) => {
             ) : (
               result.results.map((_, index) => printResult(index))
             )}
-            <strong>Executed in {result.time.toFixed(1)} ms</strong>
           </>
         ) : null}
       </div>
+      {result ? (
+        <strong style={{ display: 'block', marginTop: 15 }}>Executed in {result.time.toFixed(1)} ms</strong>
+      ) : null}
     </>
   );
 };

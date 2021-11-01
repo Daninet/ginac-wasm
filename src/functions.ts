@@ -55,6 +55,10 @@ export const factorial = (ex: GiNaCObject) => {
   return BaseFn('factorial', [ex]);
 };
 
+export const doublefactorial = (ex: GiNaCObject) => {
+  return BaseFn('doublefactorial', [ex]);
+};
+
 export const degree = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('degree', [ex1, ex2]);
 };
@@ -65,6 +69,22 @@ export const ldegree = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 
 export const coeff = (ex1: GiNaCObject, ex2: GiNaCObject, n: number) => {
   return BaseFn('coeff', [ex1, ex2, numeric(n.toString())] as GiNaCObject[]);
+};
+
+export const mod = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('mod', [ex1, ex2]);
+};
+
+export const smod = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('smod', [ex1, ex2]);
+};
+
+export const irem = (ex1: GiNaCObject, ex2: GiNaCObject, ex3?: GiNaCObject) => {
+  return BaseFn('irem', [ex1, ex2]);
+};
+
+export const iquo = (ex1: GiNaCObject, ex2: GiNaCObject, ex3?: GiNaCObject) => {
+  return BaseFn('iquo', [ex1, ex2]);
 };
 
 export const quo = (ex1: GiNaCObject, ex2: GiNaCObject, ex3: GiNaCObject) => {
@@ -89,6 +109,14 @@ export const unit = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 
 export const content = (ex1: GiNaCObject) => {
   return BaseFn('content', [ex1]);
+};
+
+export const bernoulli = (ex1: GiNaCObject) => {
+  return BaseFn('bernoulli', [ex1]);
+};
+
+export const fibonacci = (ex1: GiNaCObject) => {
+  return BaseFn('fibonacci', [ex1]);
 };
 
 export const primpart = (ex1: GiNaCObject, ex2: GiNaCObject, ex3?: GiNaCObject) => {
@@ -213,8 +241,16 @@ export const conjugate = (ex: GiNaCObject) => {
   return BaseFn('conjugate', [ex]);
 };
 
+export const real = (ex: GiNaCObject) => {
+  return BaseFn('real', [ex]);
+};
+
 export const real_part = (ex: GiNaCObject) => {
   return BaseFn('real_part', [ex]);
+};
+
+export const imag = (ex: GiNaCObject) => {
+  return BaseFn('imag', [ex]);
 };
 
 export const imag_part = (ex: GiNaCObject) => {
@@ -392,7 +428,6 @@ export const solve = () => {
 };
 
 export const inverse = (ex: GiNaCObject) => {
-  if (ex.type !== 'matrix') throw new Error('inverse() requires a matrix parameter');
   return BaseFn('inverse', [ex]);
 };
 
@@ -466,4 +501,42 @@ export const greaterThan = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 
 export const greaterThanOrEqualTo = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('greaterThanOrEqualTo', [ex1, ex2]);
+};
+
+export const integral = (ex1: GiNaCObject, ex2: GiNaCObject, ex3: GiNaCObject, ex4: GiNaCObject) => {
+  return BaseFn('integral', [ex1, ex2, ex3, ex4]);
+};
+
+export const eval_integ = (ex1: GiNaCObject) => {
+  return BaseFn('eval_integ', [ex1]);
+};
+
+export const digits = (digits: number) => {
+  return BaseFn('digits', [numeric(digits.toString())]);
+};
+
+export const relative_integration_error = (ex: GiNaCObject) => {
+  return BaseFn('relative_integration_error', [ex]);
+};
+
+export const max_integration_level = (level: GiNaCObject) => {
+  return BaseFn('max_integration_level', [numeric(level.toString())]);
+};
+
+export const adaptivesimpson = (
+  ex1: GiNaCObject,
+  ex2: GiNaCObject,
+  ex3: GiNaCObject,
+  ex4: GiNaCObject,
+  ex5: GiNaCObject,
+) => {
+  return BaseFn('adaptivesimpson', [ex1, ex2, ex3, ex4, ex5]);
+};
+
+export const has = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('has', [ex1, ex2]);
+};
+
+export const find = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('find', [ex1, ex2]);
 };

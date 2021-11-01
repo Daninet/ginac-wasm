@@ -151,6 +151,20 @@ export const Catalan = () => {
   };
 };
 
+export const I = () => {
+  return {
+    type: 'const',
+    toBuf(buf: Uint8Array, index: number) {
+      buf[index++] = 0xa3;
+      return 1;
+    },
+
+    toString() {
+      return 'I';
+    },
+  };
+};
+
 export const ref = (refIndex: number) => {
   return {
     type: 'ref',
@@ -163,22 +177,6 @@ export const ref = (refIndex: number) => {
 
     toString() {
       return 'ref()';
-    },
-  };
-};
-
-export const digits = (digits: number) => {
-  return {
-    type: 'ref',
-    toBuf(buf: Uint8Array, index: number) {
-      const originalIndex = index;
-      buf[index++] = 0x0f;
-      index += numeric(digits.toString()).toBuf(buf, index);
-      return index - originalIndex;
-    },
-
-    toString() {
-      return 'digits()';
     },
   };
 };
