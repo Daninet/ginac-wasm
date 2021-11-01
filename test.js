@@ -3,7 +3,7 @@ const { initGiNaC, getFactory } = require('./dist/index.umd.min.js');
 (async () => {
   const GiNaC = await initGiNaC('./dist/ginac.wasm');
   const g = getFactory();
-  console.log(GiNaC.parsePrint(['1+2', '2+3']));
+  console.log(GiNaC.print(['1+2', '2+3']));
 
   console.log(
     GiNaC.print([

@@ -8,7 +8,6 @@
 #include <string>
 
 using namespace GiNaC;
-// using namespace emscripten;
 
 volatile uint8_t iobuffer_raw[65536] = {0};
 uint8_t* iobuffer = (uint8_t*)iobuffer_raw;
@@ -409,6 +408,29 @@ void print_result_list(GiNaC::lst& lst) {
   *size_ptr = 0;
 }
 
+size_t archive_result(GiNaC::ex& ex, size_t index) {
+  GiNaC::archive archive(ex);
+  std::ostringstream ss;
+  ss << archive;
+  std::string s = ss.str();
+  size_t str_size = s.size();
+  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
+  *size_ptr = str_size;
+  const char* cstr = s.c_str();
+  memcpy(iobufferstr + index + 4, cstr, str_size);
+  return 4 + str_size;
+}
+
+void archive_result_list(GiNaC::lst& lst) {
+  size_t index = 0;
+  for (lst::const_iterator i = lst.begin(); i != lst.end(); ++i) {
+    auto ex = *i;
+    index += archive_result(ex, index);
+  }
+  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
+  *size_ptr = 0;
+}
+
 extern "C" {
 
 uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
@@ -431,6 +453,14 @@ void ginac_print() {
   GiNaC::Digits = 17;
   auto lst = parse();
   print_result_list(lst);
+  expressions.remove_all();
+  symbol_map.clear();
+}
+
+void ginac_archive() {
+  GiNaC::Digits = 17;
+  auto lst = parse();
+  archive_result_list(lst);
   expressions.remove_all();
   symbol_map.clear();
 }

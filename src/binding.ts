@@ -9,18 +9,22 @@ const makeInstance = (binding: any) => {
   const iobuf = binding.HEAPU8.subarray(ptr, ptr + 65536) as Uint8Array;
   const ioview = new DataView(iobuf.buffer, iobuf.byteOffset, iobuf.byteLength);
 
-  const readResponseStr = () => {
-    const res = [];
+  const readResponse = () => {
+    const res: Uint8Array[] = [];
     let read = 0;
     while (true) {
       const strSize = ioview.getUint32(read, true);
       if (strSize === 0) break;
       read += 4;
-      const str = utf8decoder.decode(iobuf.subarray(read, read + strSize));
+      const buf = iobuf.subarray(read, read + strSize);
       read += strSize;
-      res.push(str);
+      res.push(buf);
     }
     return res;
+  };
+
+  const readResponseStr = () => {
+    return readResponse().map(res => utf8decoder.decode(res));
   };
 
   return {
@@ -43,6 +47,15 @@ const makeInstance = (binding: any) => {
       iobuf[written] = 0;
       binding._ginac_print();
       return readResponseStr();
+    },
+    archive: (exs: GiNaCObject[]) => {
+      let written = 0;
+      exs.forEach(ex => {
+        written += ex.toBuf(iobuf, written);
+      });
+      iobuf[written] = 0;
+      binding._ginac_archive();
+      return readResponse().slice();
     },
   };
 };

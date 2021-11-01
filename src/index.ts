@@ -2,14 +2,22 @@ import { getBinding } from './binding';
 import * as GiNaCFactory from './comm';
 
 export const initGiNaC = async (wasmPath: string) => {
+  if (!wasmPath || typeof wasmPath !== 'string') {
+    throw new Error('wasmPath needs to be a valid path to the .wasm binary');
+  }
   const binding = await getBinding(wasmPath);
 
   const GiNaC = {
-    parsePrint: (arr: string[] | string) => {
-      return binding.parsePrint(Array.isArray(arr) ? arr : [arr]);
+    print: (arr: string[] | string | GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
+      const lst = Array.isArray(arr) ? arr : [arr];
+      if (lst.length === 0) return [];
+      if (typeof lst[0] === 'string') {
+        return binding.parsePrint(lst as string[]);
+      }
+      return binding.print(lst as GiNaCFactory.GiNaCObject[]);
     },
-    print: (arr: GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
-      return binding.print(Array.isArray(arr) ? arr : [arr]);
+    archive: (arr: GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
+      return binding.archive(Array.isArray(arr) ? arr : [arr]);
     },
   };
 
