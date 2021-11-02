@@ -42,6 +42,14 @@ GiNaC::ex parseRef() {
   return expressions[index];
 }
 
+GiNaC::ex parseReaderString() {
+  GiNaC::parser reader;
+  size_t len = strlen(iobufferstr + ioindex);
+  auto res = reader(iobufferstr + ioindex);
+  ioindex += len + 1;
+  return res;
+}
+
 GiNaC::ex parseList() {
   GiNaC::lst lst;
   while (iobufferstr[ioindex] != 0) {
@@ -432,6 +440,8 @@ GiNaC::ex parseType() {
       return parseMatrix();
     case 0x06:
       return parseRef();
+    case 0x07:
+      return parseReaderString();
     case 0x21:
       return parseFunction1();
     case 0x22:

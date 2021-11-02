@@ -186,3 +186,21 @@ export const ex = (ex: GiNaCObject) => {
     },
   };
 };
+
+export const parse = (name: string) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x07;
+      const str = utf8encoder.encode(name);
+      buf.set(str, index);
+      index += str.length;
+      buf[index++] = 0;
+      return index - originalIndex;
+    },
+
+    toString() {
+      return `parse(${ex.toString()})`;
+    },
+  };
+};
