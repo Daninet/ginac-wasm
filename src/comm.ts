@@ -2,14 +2,12 @@ export * from './functions';
 const utf8encoder = new TextEncoder();
 
 export type GiNaCObject = {
-  type?: 'numeric' | 'symbol' | 'lst' | 'matrix' | any;
   toBuf(buf: Uint8Array, index: number): number;
   toString(): string;
 };
 
 export const numeric = (num: string) => {
   return {
-    type: 'numeric',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x02;
@@ -27,7 +25,6 @@ export const numeric = (num: string) => {
 
 export const symbol = (name: string) => {
   return {
-    type: 'symbol',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x03;
@@ -50,7 +47,6 @@ export const lst = (items: GiNaCObject[]) => {
   }
 
   return {
-    type: 'lst',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x04;
@@ -88,7 +84,6 @@ export const matrix = (rows: number, columns: number, items: GiNaCObject[]) => {
   }
 
   return {
-    type: 'matrix',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x05;
@@ -111,7 +106,6 @@ export const matrix = (rows: number, columns: number, items: GiNaCObject[]) => {
 
 export const Pi = () => {
   return {
-    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa0;
       return 1;
@@ -125,7 +119,6 @@ export const Pi = () => {
 
 export const Euler = () => {
   return {
-    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa1;
       return 1;
@@ -153,7 +146,6 @@ export const Catalan = () => {
 
 export const I = () => {
   return {
-    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa3;
       return 1;
@@ -167,7 +159,6 @@ export const I = () => {
 
 export const ref = (refIndex: number) => {
   return {
-    type: 'ref',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x06;
@@ -183,7 +174,6 @@ export const ref = (refIndex: number) => {
 
 export const ex = (ex: GiNaCObject) => {
   return {
-    type: 'expression',
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x01;

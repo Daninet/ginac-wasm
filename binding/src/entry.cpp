@@ -168,6 +168,9 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "trace")) {
     return GiNaC::trace(try_ex_to<GiNaC::matrix>(param));
   }
+  if (FN_CMP(len, name, "transpose")) {
+    return GiNaC::transpose(try_ex_to<GiNaC::matrix>(param));
+  }
   if (FN_CMP(len, name, "unique")) {
     auto lst = try_ex_to<GiNaC::lst>(param);
     return lst.unique();
@@ -281,13 +284,13 @@ GiNaC::ex parseFunction2() {
   if (FN_CMP(len, name, "pow")) return GiNaC::pow(param1, param2);
   if (FN_CMP(len, name, "primpart")) return param1.primpart(param2);
   if (FN_CMP(len, name, "psi2")) return GiNaC::psi(param1, param2);
-  if (FN_CMP(len, name, "shiftLeft")) {
+  if (FN_CMP(len, name, "shiftleft")) {
     auto num1 = try_ex_to<GiNaC::numeric>(param1).to_cl_N();
     auto num2 = try_ex_to<GiNaC::numeric>(param2).to_cl_N();
     return GiNaC::numeric(cln::the<cln::cl_I>(num1)
                           << cln::the<cln::cl_I>(num2));
   }
-  if (FN_CMP(len, name, "shiftRight")) {
+  if (FN_CMP(len, name, "shiftright")) {
     auto num1 = try_ex_to<GiNaC::numeric>(param1).to_cl_N();
     auto num2 = try_ex_to<GiNaC::numeric>(param2).to_cl_N();
     return GiNaC::numeric(cln::the<cln::cl_I>(num1) >>

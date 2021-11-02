@@ -17,7 +17,7 @@ comment
 
 statement
   = 'digits' _ '=' _ num:base10_digits {
-    return { expr: g.digits(Number(num)) };
+    return { expr: g.digits(g.numeric(num)) };
   }
   / id:$id _ '=' _ expr:expression {
     return { id, expr };

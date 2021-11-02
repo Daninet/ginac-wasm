@@ -53,6 +53,45 @@ unique({1, 1, 2, 3, 2, 2})
 `.trim(),
   },
   {
+    name: 'Bitwise',
+    text: `
+not(-2)
+or(8, 3)
+and(15, 3)
+xor(15, 3)
+nand(15, 3)
+nor(15, 3)
+shiftleft(1, 3)
+shiftright(8, 3)
+`.trim(),
+  },
+  {
+    name: 'Matrix',
+    text: `
+M = [[1, 3], [-3, 2]]
+determinant(M)
+trace(M)
+rank(M)
+transpose(M)
+charpoly(M,lambda)
+evalm([[1, 2]] + [[3, 4]])
+evalm([[1, 2]] - [[3, 4]])
+evalm([[1, 2]] * [[3], [4]])
+evalm([[1, 2]] * 4)
+evalm([[1, 2], [3, 4]]^(-1))
+A = [ [1, 1], [2, -1] ]
+A2 = A+2*M
+evalm(A2)
+B = [ [0, 0, a], [b, 1, -b], [-1/a, 0, 0] ]
+evalm(B^(2^123))
+diag_matrix({1, 2, 3})
+unit_matrix(3, 4)
+C = [[11, 12, 13], [21, 22, 23], [31, 32, 33]]
+reduced_matrix(C, 1, 1)
+sub_matrix(C, 1, 2, 1, 2)
+`.trim(),
+  },
+  {
     name: 'Numeric functions',
     text: `
 inverse(3)

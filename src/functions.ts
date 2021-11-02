@@ -36,14 +36,12 @@ export const evalf = (ex: GiNaCObject) => {
   return BaseFn('evalf', [ex]);
 };
 
-export const diff = (ex1: GiNaCObject, symbolName: string, nth = 1) => {
-  if (nth < 1) throw new Error('Nth should be greater than 0');
-  if (nth > 255) throw new Error('Nth should be less than 256');
-  return BaseFn('diff', [ex1, symbol(symbolName), numeric(nth.toString())] as GiNaCObject[]);
+export const diff = (ex1: GiNaCObject, symbolName: GiNaCObject, nth?: GiNaCObject) => {
+  return BaseFn('diff', [ex1, symbolName, nth ?? numeric('1')]);
 };
 
-export const lsolve = (ex: GiNaCObject, symbolName: string) => {
-  return BaseFn('lsolve', [ex, symbol(symbolName)] as GiNaCObject[]);
+export const lsolve = (ex: GiNaCObject, symbolName: GiNaCObject) => {
+  return BaseFn('lsolve', [ex, symbolName]);
 };
 
 export const factor = (ex: GiNaCObject, all = false) => {
@@ -67,8 +65,8 @@ export const ldegree = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('ldegree', [ex1, ex2]);
 };
 
-export const coeff = (ex1: GiNaCObject, ex2: GiNaCObject, n: number) => {
-  return BaseFn('coeff', [ex1, ex2, numeric(n.toString())] as GiNaCObject[]);
+export const coeff = (ex1: GiNaCObject, ex2: GiNaCObject, ex3: GiNaCObject) => {
+  return BaseFn('coeff', [ex1, ex2, ex3]);
 };
 
 export const mod = (ex1: GiNaCObject, ex2: GiNaCObject) => {
@@ -79,11 +77,11 @@ export const smod = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('smod', [ex1, ex2]);
 };
 
-export const irem = (ex1: GiNaCObject, ex2: GiNaCObject, ex3?: GiNaCObject) => {
+export const irem = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('irem', [ex1, ex2]);
 };
 
-export const iquo = (ex1: GiNaCObject, ex2: GiNaCObject, ex3?: GiNaCObject) => {
+export const iquo = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('iquo', [ex1, ex2]);
 };
 
@@ -156,9 +154,8 @@ export const numer_denom = (ex: GiNaCObject) => {
   return BaseFn('numer_denom', [ex]);
 };
 
-export const series = (ex: GiNaCObject, r: GiNaCObject, order: GiNaCObject | number) => {
-  const orderParam = typeof order === 'number' ? numeric(order.toString()) : order;
-  return BaseFn('series', [ex, r, orderParam] as GiNaCObject[]);
+export const series = (ex: GiNaCObject, r: GiNaCObject, order: GiNaCObject) => {
+  return BaseFn('series', [ex, r, order] as GiNaCObject[]);
 };
 
 export const abs = (ex: GiNaCObject) => {
@@ -334,7 +331,6 @@ export const pow = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 };
 
 export const determinant = (ex: GiNaCObject) => {
-  if (ex.type !== 'matrix') throw new Error('determinant() requires a matrix parameter');
   return BaseFn('determinant', [ex]);
 };
 
@@ -343,7 +339,6 @@ export const evalm = (ex: GiNaCObject) => {
 };
 
 export const charpoly = (ex1: GiNaCObject, ex2: GiNaCObject) => {
-  if (ex1.type !== 'matrix') throw new Error('charpoly() requires a matrix');
   return BaseFn('charpoly', [ex1, ex2]);
 };
 
@@ -355,8 +350,8 @@ export const collect = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('collect', [ex1, ex2]);
 };
 
-export const fsolve = (ex: GiNaCObject, symbolName: string, min: number, max: number) => {
-  return BaseFn('fsolve', [ex, symbol(symbolName), numeric(min.toString()), numeric(max.toString())] as GiNaCObject[]);
+export const fsolve = (ex: GiNaCObject, symbolName: GiNaCObject, min: GiNaCObject, max: GiNaCObject) => {
+  return BaseFn('fsolve', [ex, symbolName, min, max]);
 };
 
 export const subs = (ex1: GiNaCObject, ex2: GiNaCObject) => {
@@ -364,42 +359,34 @@ export const subs = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 };
 
 export const diag_matrix = (lst: GiNaCObject) => {
-  if (lst.type !== 'lst') throw new Error('diag_matrix() requires a list');
   return BaseFn('diag_matrix', [lst]);
 };
 
-export const unit_matrix = (rows: number, cols: number) => {
-  return BaseFn('unit_matrix', [numeric(rows.toString()), numeric(cols.toString())] as GiNaCObject[]);
+export const unit_matrix = (rows: GiNaCObject, cols: GiNaCObject) => {
+  return BaseFn('unit_matrix', [rows, cols]);
 };
 
 export const symbolic_matrix = () => {
   throw new Error('Not implemented!');
 };
 
-export const sub_matrix = (m: GiNaCObject, rowOffset: number, rows: number, colOffset: number, cols: number) => {
-  if (m.type !== 'matrix') throw new Error('sub_matrix() requires a matrix');
-  return BaseFn('sub_matrix', [
-    m,
-    numeric(rowOffset.toString()),
-    numeric(rows.toString()),
-    numeric(colOffset.toString()),
-    numeric(cols.toString()),
-  ] as GiNaCObject[]);
+export const sub_matrix = (
+  m: GiNaCObject,
+  rowOffset: GiNaCObject,
+  rows: GiNaCObject,
+  colOffset: GiNaCObject,
+  cols: GiNaCObject,
+) => {
+  return BaseFn('sub_matrix', [m, rowOffset, rows, colOffset, cols]);
 };
 
-export const reduced_matrix = (m: GiNaCObject, row: number, column: number) => {
-  if (m.type !== 'matrix') throw new Error('reduced_matrix() requires a matrix');
-  return BaseFn('reduced_matrix', [m, numeric(row.toString()), numeric(column.toString())] as GiNaCObject[]);
+export const reduced_matrix = (m: GiNaCObject, row: GiNaCObject, column: GiNaCObject) => {
+  return BaseFn('reduced_matrix', [m, row, column]);
 };
 
-// TODO matrix functions
-// const ex & matrix::operator()(unsigned r, unsigned c) const;
-// matrix matrix::add(const matrix & other) const;
-// matrix matrix::sub(const matrix & other) const;
-// matrix matrix::mul(const matrix & other) const;
-// matrix matrix::mul_scalar(const ex & other) const;
-// matrix matrix::pow(const ex & expn) const;
-// matrix matrix::transpose() const;
+export const transpose = (ex: GiNaCObject) => {
+  return BaseFn('transpose', [ex]);
+};
 
 export const indexed = () => {
   throw new Error('Not implemented!');
@@ -410,12 +397,10 @@ export const simplify_indexed = () => {
 };
 
 export const trace = (ex: GiNaCObject) => {
-  if (ex.type !== 'matrix') throw new Error('trace() requires a matrix parameter');
   return BaseFn('trace', [ex]);
 };
 
 export const rank = (ex: GiNaCObject) => {
-  if (ex.type !== 'matrix') throw new Error('rank() requires a matrix parameter');
   return BaseFn('rank', [ex]);
 };
 
@@ -471,12 +456,12 @@ export const nor = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('nor', [ex1, ex2]);
 };
 
-export const shiftLeft = (ex1: GiNaCObject, ex2: GiNaCObject) => {
-  return BaseFn('shiftLeft', [ex1, ex2]);
+export const shiftleft = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('shiftleft', [ex1, ex2]);
 };
 
-export const shiftRight = (ex1: GiNaCObject, ex2: GiNaCObject) => {
-  return BaseFn('shiftRight', [ex1, ex2]);
+export const shiftright = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('shiftright', [ex1, ex2]);
 };
 
 export const equal = (ex1: GiNaCObject, ex2: GiNaCObject) => {
@@ -511,8 +496,8 @@ export const eval_integ = (ex1: GiNaCObject) => {
   return BaseFn('eval_integ', [ex1]);
 };
 
-export const digits = (digits: number) => {
-  return BaseFn('digits', [numeric(digits.toString())]);
+export const digits = (digits: GiNaCObject) => {
+  return BaseFn('digits', [digits]);
 };
 
 export const relative_integration_error = (ex: GiNaCObject) => {
