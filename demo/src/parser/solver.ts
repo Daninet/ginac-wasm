@@ -20,7 +20,7 @@ export const initSolver = () => {
 };
 
 export const solve = (lines: string[]) => {
-  return new Promise<string[]>(resolve => {
+  return new Promise<{ string: string; error?: string }[]>(resolve => {
     promises.push(resolve);
     solverworker.postMessage({ lines });
   });

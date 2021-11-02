@@ -15,6 +15,15 @@ char* iobufferstr = (char*)iobuffer_raw;
 
 int ioindex = 0;
 
+enum PrintOptions : uint32_t {
+  None = 0,
+  PrintStr = 1 << 0,
+  PrintLatex = 1 << 1,
+  PrintTree = 1 << 2,
+  PrintArchive = 1 << 3,
+  PrintJSON = 1 << 4,
+};
+
 static std::map<std::string, GiNaC::symbol> symbol_map;
 
 const GiNaC::symbol& get_symbol(const std::string& s) {
@@ -478,32 +487,109 @@ GiNaC::lst parse() {
 //   console.log('from c', $0, $1, $2)
 // }, iobuffer, iobuffer[0], iobuffer[1]);
 
-size_t print_result(GiNaC::ex& res, size_t index) {
-  std::ostringstream ss;
-  ss << res;
-  std::string s = ss.str();
-  size_t str_size = s.size();
-  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
-  *size_ptr = str_size;
-  const char* cstr = s.c_str();
-  memcpy(iobufferstr + index + 4, cstr, str_size);
-  return 4 + str_size;
-}
-
-void print_result_list(GiNaC::lst& lst) {
-  size_t index = 0;
-  for (lst::const_iterator i = lst.begin(); i != lst.end(); ++i) {
-    auto ex = *i;
-    index += print_result(ex, index);
+void print_traverse_json(std::ostringstream& ss, GiNaC::ex& ex) {
+  ss << "{\"type\":";
+  if (is_a<GiNaC::symbol>(ex)) {
+    ss << "\"symbol\",";
+    ss << "\"name\":\"";
+    ss << ex;
+    ss << "\"";
+  } else if (is_a<GiNaC::constant>(ex)) {
+    ss << "\"constant\",";
+    ss << "\"name\":\"";
+    ss << ex;
+    ss << "\"";
+  } else if (is_a<GiNaC::numeric>(ex)) {
+    ss << "\"numeric\",";
+    ss << "\"value\":\"";
+    ss << ex;
+    ss << "\",\"subtype\":\"";
+    auto num = ex_to<GiNaC::numeric>(ex);
+    if (GiNaC::is_integer(num)) {
+      ss << "integer";
+    } else if (GiNaC::is_rational(num)) {
+      ss << "rational";
+    } else if (GiNaC::is_real(num)) {
+      ss << "real";
+    } else if (GiNaC::is_cinteger(num)) {
+      ss << "cinteger";
+    } else if (GiNaC::is_crational(num)) {
+      ss << "crational";
+    } else {
+      ss << "unknown";
+    }
+    ss << "\"";
+  } else if (is_a<GiNaC::add>(ex)) {
+    ss << "\"add\"";
+  } else if (is_a<GiNaC::mul>(ex)) {
+    ss << "\"mul\"";
+  } else if (is_a<GiNaC::ncmul>(ex)) {
+    ss << "\"ncmul\"";
+  } else if (is_a<GiNaC::power>(ex)) {
+    ss << "\"power\"";
+  } else if (is_a<GiNaC::pseries>(ex)) {
+    ss << "\"pseries\"";
+  } else if (is_a<GiNaC::function>(ex)) {
+    ss << "\"function\",";
+    ss << "\"value\":\"";
+    ss << ex_to<GiNaC::function>(ex).get_name();
+    ss << "\"";
+  } else if (is_a<GiNaC::lst>(ex)) {
+    ss << "\"lst\"";
+  } else if (is_a<GiNaC::matrix>(ex)) {
+    ss << "\"matrix\",\"rows\":";
+    auto matrix = ex_to<GiNaC::matrix>(ex);
+    ss << matrix.rows();
+    ss << ",\"cols\":";
+    ss << matrix.cols();
+  } else if (is_a<GiNaC::relational>(ex)) {
+    ss << "\"relational\",\"op\":\"";
+    auto rel = ex_to<GiNaC::relational>(ex);
+    if (rel.info(info_flags::relation_equal)) {
+      ss << "==";
+    } else if (rel.info(info_flags::relation_not_equal)) {
+      ss << "!=";
+    } else if (rel.info(info_flags::relation_less)) {
+      ss << "<";
+    } else if (rel.info(info_flags::relation_less_or_equal)) {
+      ss << "<=";
+    } else if (rel.info(info_flags::relation_greater)) {
+      ss << ">";
+    } else if (rel.info(info_flags::relation_greater_or_equal)) {
+      ss << ">=";
+    }
+    ss << "\"";
+  } else if (is_a<GiNaC::indexed>(ex)) {
+    ss << "\"indexed\"";
+  } else if (is_a<GiNaC::tensor>(ex)) {
+    ss << "\"tensor\"";
+  } else if (is_a<GiNaC::idx>(ex)) {
+    ss << "\"idx\"";
+  } else if (is_a<GiNaC::varidx>(ex)) {
+    ss << "\"varidx\"";
+  } else if (is_a<GiNaC::spinidx>(ex)) {
+    ss << "\"spinidx\"";
+  } else if (is_a<GiNaC::wildcard>(ex)) {
+    ss << "\"wildcard\"";
+  } else {
+    ss << "\"unknown\"";
   }
-  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
-  *size_ptr = 0;
+  if (ex.nops() > 0) {
+    ss << ",\"children\":[";
+    for (const_iterator i = ex.begin(); i != ex.end(); ++i) {
+      if (i != ex.begin()) {
+        ss << ",";
+      }
+      auto ex = *i;
+      print_traverse_json(ss, ex);
+    }
+    ss << "]}";
+  } else {
+    ss << "}";
+  }
 }
 
-size_t archive_result(GiNaC::ex& ex, size_t index) {
-  GiNaC::archive archive(ex);
-  std::ostringstream ss;
-  ss << archive;
+size_t print_result(std::ostringstream& ss, size_t index) {
   std::string s = ss.str();
   size_t str_size = s.size();
   uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
@@ -513,11 +599,36 @@ size_t archive_result(GiNaC::ex& ex, size_t index) {
   return 4 + str_size;
 }
 
-void archive_result_list(GiNaC::lst& lst) {
+void print_result_list(PrintOptions opt, GiNaC::lst& lst) {
   size_t index = 0;
   for (lst::const_iterator i = lst.begin(); i != lst.end(); ++i) {
     auto ex = *i;
-    index += archive_result(ex, index);
+    if (opt & PrintOptions::PrintStr) {
+      std::ostringstream ss;
+      ss << ex;
+      index += print_result(ss, index);
+    }
+    if (opt & PrintOptions::PrintLatex) {
+      std::ostringstream ss;
+      ss << GiNaC::latex << ex;
+      index += print_result(ss, index);
+    }
+    if (opt & PrintOptions::PrintTree) {
+      std::ostringstream ss;
+      ss << GiNaC::tree << ex;
+      index += print_result(ss, index);
+    }
+    if (opt & PrintOptions::PrintArchive) {
+      GiNaC::archive archive(ex);
+      std::ostringstream ss;
+      ss << archive;
+      index += print_result(ss, index);
+    }
+    if (opt & PrintOptions::PrintJSON) {
+      std::ostringstream ss;
+      print_traverse_json(ss, ex);
+      index += print_result(ss, index);
+    }
   }
   uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
   *size_ptr = 0;
@@ -527,33 +638,16 @@ extern "C" {
 
 uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
 
-void ginac_parse_print() {
-  GiNaC::Digits = 17;
-  GiNaC::parser reader;
-  GiNaC::lst lst;
-  size_t index = 0;
-  while (iobufferstr[index] != 0) {
-    size_t len = strlen(iobufferstr + index);
-    auto res = reader(iobufferstr + index);
-    lst.append(res);
-    index += len + 1;
-  }
-  print_result_list(lst);
-}
-
-void ginac_print() {
+void ginac_print(PrintOptions opt) {
   GiNaC::Digits = 17;
   auto lst = parse();
-  print_result_list(lst);
+  print_result_list(opt, lst);
   expressions.remove_all();
   symbol_map.clear();
 }
 
-void ginac_archive() {
-  GiNaC::Digits = 17;
-  auto lst = parse();
-  archive_result_list(lst);
-  expressions.remove_all();
-  symbol_map.clear();
+void ginac_get_exception(intptr_t exceptionPtr) {
+  std::string except(reinterpret_cast<std::exception*>(exceptionPtr)->what());
+  strcpy(iobufferstr, except.c_str());
 }
 }

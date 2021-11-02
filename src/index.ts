@@ -1,4 +1,4 @@
-import { getBinding } from './binding';
+import { getBinding, PrintOptions } from './binding';
 import * as GiNaCFactory from './comm';
 
 export const initGiNaC = async (wasmPath: string) => {
@@ -7,21 +7,11 @@ export const initGiNaC = async (wasmPath: string) => {
   }
   const binding = await getBinding(wasmPath);
 
-  const GiNaC = {
-    print: (arr: string[] | string | GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
-      const lst = Array.isArray(arr) ? arr : [arr];
-      if (lst.length === 0) return [];
-      if (typeof lst[0] === 'string') {
-        return binding.parsePrint(lst as string[]);
-      }
-      return binding.print(lst as GiNaCFactory.GiNaCObject[]);
-    },
-    archive: (arr: GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject) => {
-      return binding.archive(Array.isArray(arr) ? arr : [arr]);
-    },
+  const GiNaC = (arr: GiNaCFactory.GiNaCObject[] | GiNaCFactory.GiNaCObject, opts: PrintOptions = { string: true }) => {
+    const lst = Array.isArray(arr) ? arr : [arr];
+    if (lst.length === 0) return [];
+    return binding.print(lst, opts);
   };
-
-  // binding.setDigits(precision);
 
   return GiNaC;
 };

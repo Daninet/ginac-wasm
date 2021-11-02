@@ -35,7 +35,7 @@ const parseLines = (lines: string[]) => {
 
   try {
     const asts = parseLines(lines);
-    res = GiNaC.print(asts);
+    res = GiNaC(asts);
   } catch (err) {
     console.error(err);
     res = err.message ?? 'Evaluation error';

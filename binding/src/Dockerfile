@@ -22,7 +22,7 @@ RUN mkdir -p /builder/dist && \
   -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
   -s FILESYSTEM=1 \
   -s ASSERTIONS=0 \
-  -s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_parse_print", "_ginac_archive"]' \
+  -s EXPORTED_FUNCTIONS='["_ginac_get_buffer", "_ginac_print", "_ginac_get_exception"]' \
   --emit-symbol-map \
   -lcln -lginac \
   src/entry.o \

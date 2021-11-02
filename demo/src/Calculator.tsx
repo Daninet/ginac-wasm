@@ -23,7 +23,7 @@ export const Calculator = ({}) => {
       } else {
         setResult({
           inputs: lines,
-          results,
+          results: results.map(r => r.string ?? r.error),
           time: end - start,
         });
       }
