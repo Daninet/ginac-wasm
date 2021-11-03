@@ -9,9 +9,9 @@
 
 using namespace GiNaC;
 
-volatile uint8_t iobuffer_raw[65536] = {0};
-uint8_t* iobuffer = (uint8_t*)iobuffer_raw;
-char* iobufferstr = (char*)iobuffer_raw;
+uint8_t iobuffer_raw[65536] = {0};
+uint8_t* const iobuffer = (uint8_t*)iobuffer_raw;
+char* const iobufferstr = (char*)iobuffer_raw;
 
 int ioindex = 0;
 
@@ -74,6 +74,23 @@ GiNaC::ex parseList() {
   }
   ioindex++;
   return lst;
+}
+
+struct membuf : std::streambuf {
+  membuf(char* base, std::ptrdiff_t n) { this->setg(base, base, base + n); }
+};
+
+// TODO: fixme
+GiNaC::ex parseArchive() {
+  uint32_t size = *((uint32_t*)(iobufferstr + ioindex));
+  ioindex += 4;
+  printf("size %d\n", size);
+  GiNaC::archive archive;
+  membuf sbuf(iobufferstr + ioindex, size);
+  std::istream in(&sbuf);
+  in >> archive;
+  GiNaC::lst syms = {};
+  return archive.unarchive_ex(syms);
 }
 
 GiNaC::ex parseMatrix() {
@@ -459,6 +476,8 @@ GiNaC::ex parseType() {
       return parseRef();
     case 0x07:
       return parseReaderString();
+    case 0x08:
+      return parseArchive();
     case 0x09: {  // realsymbol
       std::string str(&iobufferstr[ioindex]);
       ioindex += str.length() + 1;
