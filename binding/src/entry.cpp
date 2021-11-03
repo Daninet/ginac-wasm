@@ -676,10 +676,16 @@ uint32_t ginac_get_buffer() { return (uint32_t)iobuffer; }
 
 void ginac_print(PrintOptions opt) {
   GiNaC::Digits = 17;
-  auto lst = parse();
-  print_result_list(opt, lst);
-  expressions.remove_all();
-  symbol_map.clear();
+  try {
+    auto lst = parse();
+    print_result_list(opt, lst);
+    expressions.remove_all();
+    symbol_map.clear();
+  } catch (...) {
+    expressions.remove_all();
+    symbol_map.clear();
+    throw;
+  }
 }
 
 void ginac_get_exception(intptr_t exceptionPtr) {
