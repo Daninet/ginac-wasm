@@ -26,13 +26,21 @@ enum PrintOptions : uint32_t {
 
 static std::map<std::string, GiNaC::symbol> symbol_map;
 
-const GiNaC::symbol& get_symbol(const std::string& s) {
+const GiNaC::symbol& get_symbol(const std::string& s, unsigned domain) {
   auto i = symbol_map.find(s);
 
   if (i != symbol_map.end()) {
     return i->second;
   } else {
-    return symbol_map.insert(make_pair(s, GiNaC::symbol(s))).first->second;
+    std::pair<std::string, GiNaC::symbol> pair;
+    if (domain == GiNaC::domain::complex) {
+      pair = make_pair(s, GiNaC::symbol(s));
+    } else if (domain == GiNaC::domain::real) {
+      pair = make_pair(s, GiNaC::realsymbol(s));
+    } else if (domain == GiNaC::domain::positive) {
+      pair = make_pair(s, GiNaC::possymbol(s));
+    }
+    return symbol_map.insert(pair).first->second;
   }
 }
 
@@ -441,7 +449,7 @@ GiNaC::ex parseType() {
     case 0x03: {  // symbol
       std::string str(&iobufferstr[ioindex]);
       ioindex += str.length() + 1;
-      return get_symbol(str);
+      return get_symbol(str, GiNaC::domain::complex);
     }
     case 0x04:
       return parseList();
@@ -451,6 +459,16 @@ GiNaC::ex parseType() {
       return parseRef();
     case 0x07:
       return parseReaderString();
+    case 0x09: {  // realsymbol
+      std::string str(&iobufferstr[ioindex]);
+      ioindex += str.length() + 1;
+      return get_symbol(str, GiNaC::domain::real);
+    }
+    case 0x10: {  // possymbol
+      std::string str(&iobufferstr[ioindex]);
+      ioindex += str.length() + 1;
+      return get_symbol(str, GiNaC::domain::positive);
+    }
     case 0x21:
       return parseFunction1();
     case 0x22:
@@ -630,8 +648,7 @@ void print_result_list(PrintOptions opt, GiNaC::lst& lst) {
       index += print_result(ss, index);
     }
   }
-  uint32_t* size_ptr = (uint32_t*)(iobufferstr + index);
-  *size_ptr = 0;
+  memset(iobufferstr + index, 0, 4);
 }
 
 extern "C" {

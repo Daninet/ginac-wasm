@@ -41,6 +41,42 @@ export const symbol = (name: string) => {
   };
 };
 
+export const realsymbol = (name: string) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x09;
+      const str = utf8encoder.encode(name);
+      buf.set(str, index);
+      index += str.length;
+      buf[index++] = 0;
+      return index - originalIndex;
+    },
+
+    toString() {
+      return name;
+    },
+  };
+};
+
+export const possymbol = (name: string) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x0a;
+      const str = utf8encoder.encode(name);
+      buf.set(str, index);
+      index += str.length;
+      buf[index++] = 0;
+      return index - originalIndex;
+    },
+
+    toString() {
+      return name;
+    },
+  };
+};
+
 export const lst = (items: GiNaCObject[]) => {
   if (!Array.isArray(items)) {
     throw new Error('Items needs to be an array!');
@@ -167,7 +203,7 @@ export const ref = (refIndex: number) => {
     },
 
     toString() {
-      return 'ref()';
+      return `ref(${refIndex})`;
     },
   };
 };
@@ -201,6 +237,25 @@ export const parse = (name: string) => {
 
     toString() {
       return `parse(${ex.toString()})`;
+    },
+  };
+};
+
+export const unarchive = (arr: Uint8Array) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x08;
+      const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+      view.setUint32(index, arr.length, true);
+      index += 4;
+      buf.set(arr, index);
+      index += arr.length;
+      return index - originalIndex;
+    },
+
+    toString() {
+      return 'unarchive([...])';
     },
   };
 };
