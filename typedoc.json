@@ -1,0 +1,15 @@
+{
+  "entryPoints": [
+    "./src/index.ts",
+    "./src/comm.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "exclude": [
+    "**/*.js",
+    "node_modules"
+  ],
+  "excludeExternals": true,
+  "hideGenerator": true,
+  "readme": "none"
+}

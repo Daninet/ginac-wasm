@@ -16,7 +16,8 @@
     "build-rollup": "rollup -c",
     "build-types": "tsc ./src/index --outDir ./dist/types --downlevelIteration --declaration --emitDeclarationOnly --allowSyntheticDefaultImports",
     "build": "npm run build-bindings && npm run build-rollup && npm run build-types",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typedoc": "typedoc"
   },
   "author": "Dani Biró <danibiro93@gmail.com>",
   "license": "GPL-2.0-only",
@@ -36,6 +37,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^10.4.0",
     "tslib": "^2.3.1",
+    "typedoc": "^0.22.7",
     "typescript": "^4.4.4"
   }
 }
