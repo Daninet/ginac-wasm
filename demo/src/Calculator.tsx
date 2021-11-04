@@ -3,7 +3,10 @@ import { DEMOS } from './demos';
 import { solve } from './parser/solver';
 
 export const Calculator = ({}) => {
-  const [demoName, setDemoName] = useState('Estimate PI');
+  const currentDemoFromUrl = decodeURIComponent((window.location.hash ?? '#').slice(1));
+  const [demoName, setDemoName] = useState(
+    DEMOS.find(d => d.name === currentDemoFromUrl) ? currentDemoFromUrl : 'Estimate PI',
+  );
   const [input, setInput] = useState('');
   const [modified, setModified] = useState(false);
   type MathResult = { error?: string; inputs?: string[]; results?: string[]; time: number };
@@ -38,6 +41,7 @@ export const Calculator = ({}) => {
     const newInput = DEMOS.find(d => d.name === demoName).text;
     setInput(newInput);
     onCalculate(newInput);
+    window.location.hash = encodeURIComponent(demoName);
   }, [demoName, onCalculate]);
 
   const onSubmit: React.FormEventHandler = async e => {
