@@ -1,5 +1,6 @@
 // #include <iostream>
 #include <cln/integer.h>
+#include <cln/real.h>
 #include <emscripten.h>
 #include <ginac/ginac.h>
 
@@ -122,6 +123,13 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "bernoulli")) {
     return GiNaC::bernoulli(try_ex_to<GiNaC::numeric>(param));
   }
+  if (FN_CMP(len, name, "ceiling")) {
+    auto num = try_ex_to<GiNaC::numeric>(param).to_cl_N();
+    return GiNaC::numeric(cln::ceiling1(cln::the<cln::cl_R>(num)));
+  }
+  if (FN_CMP(len, name, "collect_common_factors")) {
+    return GiNaC::collect_common_factors(param);
+  }
   if (FN_CMP(len, name, "conjugate")) return GiNaC::conjugate(param);
   if (FN_CMP(len, name, "cos")) return GiNaC::cos(param);
   if (FN_CMP(len, name, "cosh")) return GiNaC::cosh(param);
@@ -154,6 +162,10 @@ GiNaC::ex parseFunction1() {
     return GiNaC::factor(param, GiNaC::factor_options::all);
   }
   if (FN_CMP(len, name, "factorial")) return GiNaC::factorial(param);
+  if (FN_CMP(len, name, "floor")) {
+    auto num = try_ex_to<GiNaC::numeric>(param).to_cl_N();
+    return GiNaC::numeric(cln::floor1(cln::the<cln::cl_R>(num)));
+  }
   if (FN_CMP(len, name, "fibonacci")) {
     return GiNaC::fibonacci(try_ex_to<GiNaC::numeric>(param));
   }
@@ -166,6 +178,69 @@ GiNaC::ex parseFunction1() {
       return GiNaC::inverse(ex_to<GiNaC::matrix>(param));
     }
     return GiNaC::inverse(try_ex_to<GiNaC::numeric>(param));
+  }
+  if (FN_CMP(len, name, "is_cinteger")) {
+    return GiNaC::is_cinteger(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_crational")) {
+    return GiNaC::is_crational(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_even")) {
+    return GiNaC::is_even(try_ex_to<GiNaC::numeric>(param)) ? GiNaC::numeric(1)
+                                                            : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_integer")) {
+    return GiNaC::is_integer(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_negative")) {
+    return GiNaC::is_negative(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_nonneg_integer")) {
+    return GiNaC::is_nonneg_integer(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_odd")) {
+    return GiNaC::is_odd(try_ex_to<GiNaC::numeric>(param)) ? GiNaC::numeric(1)
+                                                           : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_positive")) {
+    return GiNaC::is_positive(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_pos_integer")) {
+    return GiNaC::is_pos_integer(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_prime")) {
+    return GiNaC::is_prime(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_rational")) {
+    return GiNaC::is_rational(try_ex_to<GiNaC::numeric>(param))
+               ? GiNaC::numeric(1)
+               : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_real")) {
+    return GiNaC::is_real(try_ex_to<GiNaC::numeric>(param)) ? GiNaC::numeric(1)
+                                                            : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "is_zero")) {
+    return GiNaC::is_zero(param) ? GiNaC::numeric(1) : GiNaC::numeric(0);
+  }
+  if (FN_CMP(len, name, "isqrt")) {
+    return GiNaC::isqrt(try_ex_to<GiNaC::numeric>(param));
   }
   if (FN_CMP(len, name, "lgamma")) return GiNaC::lgamma(param);
   if (FN_CMP(len, name, "Li2")) return GiNaC::Li2(param);
@@ -185,7 +260,7 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "Order")) return GiNaC::Order(param);
   if (FN_CMP(len, name, "psi")) return GiNaC::psi(param);
   if (FN_CMP(len, name, "rank")) {
-    return GiNaC::rank(try_ex_to<GiNaC::matrix>(param));
+    return GiNaC::numeric(GiNaC::rank(try_ex_to<GiNaC::matrix>(param)));
   }
   if (FN_CMP(len, name, "real")) {
     return GiNaC::real(try_ex_to<GiNaC::numeric>(param));
@@ -194,6 +269,10 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "relative_integration_error")) {
     GiNaC::integral::relative_integration_error = param;
     return param;
+  }
+  if (FN_CMP(len, name, "round")) {
+    auto num = try_ex_to<GiNaC::numeric>(param).to_cl_N();
+    return GiNaC::numeric(cln::round1(cln::the<cln::cl_R>(num)));
   }
   if (FN_CMP(len, name, "series_to_poly")) return GiNaC::series_to_poly(param);
   if (FN_CMP(len, name, "sin")) return GiNaC::sin(param);
@@ -297,7 +376,17 @@ GiNaC::ex parseFunction2() {
   if (FN_CMP(len, name, "lessThanOrEqualTo")) return param1 <= param2;
   if (FN_CMP(len, name, "Li")) return GiNaC::Li(param1, param2);
   if (FN_CMP(len, name, "lsolve")) {
-    return GiNaC::lsolve(param1, try_ex_to<GiNaC::symbol>(param2));
+    return GiNaC::lsolve(param1, param2);
+  }
+  if (FN_CMP(len, name, "match")) {
+    GiNaC::exmap repl_lst;
+    auto match = GiNaC::match(param1, param2, repl_lst);
+    if (!match) return GiNaC::fail();
+    GiNaC::lst lst;
+    for (auto it = repl_lst.cbegin(); it != repl_lst.cend(); ++it) {
+      lst.append(it->second);
+    }
+    return lst;
   }
   if (FN_CMP(len, name, "mod")) {
     return GiNaC::mod(try_ex_to<GiNaC::numeric>(param1),
@@ -344,6 +433,9 @@ GiNaC::ex parseFunction2() {
   }
   if (FN_CMP(len, name, "sub")) return param1 - param2;
   if (FN_CMP(len, name, "subs")) return GiNaC::subs(param1, param2);
+  if (FN_CMP(len, name, "sqrfree")) {
+    return GiNaC::sqrfree(param1, try_ex_to<GiNaC::lst>(param2));
+  }
   if (FN_CMP(len, name, "unit")) return param1.unit(param2);
   if (FN_CMP(len, name, "unit_matrix")) {
     return GiNaC::unit_matrix(try_ex_to<GiNaC::numeric>(param1).to_int(),
@@ -394,6 +486,10 @@ GiNaC::ex parseFunction3() {
   }
   if (FN_CMP(len, name, "resultant")) {
     return GiNaC::resultant(param1, param2, param3);
+  }
+  if (FN_CMP(len, name, "solve")) {
+    return try_ex_to<GiNaC::matrix>(param1).solve(
+        try_ex_to<GiNaC::matrix>(param2), try_ex_to<GiNaC::matrix>(param3));
   }
   if (FN_CMP(len, name, "S")) return GiNaC::S(param1, param2, param3);
   if (FN_CMP(len, name, "series")) {

@@ -1,4 +1,4 @@
-import { GiNaCObject, numeric, symbol } from './comm';
+import { GiNaCObject, numeric } from './comm';
 
 const utf8encoder = new TextEncoder();
 
@@ -158,12 +158,28 @@ export const series = (ex: GiNaCObject, r: GiNaCObject, order: GiNaCObject) => {
   return BaseFn('series', [ex, r, order] as GiNaCObject[]);
 };
 
+export const floor = (ex: GiNaCObject) => {
+  return BaseFn('floor', [ex]);
+};
+
+export const ceiling = (ex: GiNaCObject) => {
+  return BaseFn('ceiling', [ex]);
+};
+
+export const round = (ex: GiNaCObject) => {
+  return BaseFn('round', [ex]);
+};
+
 export const abs = (ex: GiNaCObject) => {
   return BaseFn('abs', [ex]);
 };
 
 export const sqrt = (ex: GiNaCObject) => {
   return BaseFn('sqrt', [ex]);
+};
+
+export const isqrt = (ex: GiNaCObject) => {
+  return BaseFn('isqrt', [ex]);
 };
 
 export const sin = (ex: GiNaCObject) => {
@@ -408,10 +424,6 @@ export const series_to_poly = (ex: GiNaCObject) => {
   return BaseFn('series_to_poly', [ex]);
 };
 
-export const solve = () => {
-  throw new Error('Not implemented!');
-};
-
 export const inverse = (ex: GiNaCObject) => {
   return BaseFn('inverse', [ex]);
 };
@@ -536,4 +548,68 @@ export const sort = (ex: GiNaCObject) => {
 
 export const unique = (ex: GiNaCObject) => {
   return BaseFn('unique', [ex]);
+};
+
+export const is_cinteger = (ex: GiNaCObject) => {
+  return BaseFn('is_cinteger', [ex]);
+};
+
+export const is_crational = (ex: GiNaCObject) => {
+  return BaseFn('is_crational', [ex]);
+};
+
+export const is_even = (ex: GiNaCObject) => {
+  return BaseFn('is_even', [ex]);
+};
+
+export const is_integer = (ex: GiNaCObject) => {
+  return BaseFn('is_integer', [ex]);
+};
+
+export const is_positive = (ex: GiNaCObject) => {
+  return BaseFn('is_positive', [ex]);
+};
+
+export const is_negative = (ex: GiNaCObject) => {
+  return BaseFn('is_negative', [ex]);
+};
+
+export const is_nonneg_integer = (ex: GiNaCObject) => {
+  return BaseFn('is_nonneg_integer', [ex]);
+};
+
+export const is_odd = (ex: GiNaCObject) => {
+  return BaseFn('is_odd', [ex]);
+};
+
+export const is_pos_integer = (ex: GiNaCObject) => {
+  return BaseFn('is_pos_integer', [ex]);
+};
+
+export const is_prime = (ex: GiNaCObject) => {
+  return BaseFn('is_prime', [ex]);
+};
+
+export const is_rational = (ex: GiNaCObject) => {
+  return BaseFn('is_rational', [ex]);
+};
+
+export const is_real = (ex: GiNaCObject) => {
+  return BaseFn('is_real', [ex]);
+};
+
+export const is_zero = (ex: GiNaCObject) => {
+  return BaseFn('is_zero', [ex]);
+};
+
+export const solve = (ex1: GiNaCObject, ex2: GiNaCObject, ex3: GiNaCObject) => {
+  return BaseFn('solve', [ex1, ex2, ex3]);
+};
+
+export const match = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('match', [ex1, ex2]);
+};
+
+export const collect_common_factors = (ex: GiNaCObject) => {
+  return BaseFn('collect_common_factors', [ex]);
 };
