@@ -189,7 +189,7 @@ function
 
 
 function_name
-  = [a-z_]+ {
+  = [a-z_0-9]+ {
     return text();
 }
 
