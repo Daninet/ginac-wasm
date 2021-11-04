@@ -6,7 +6,7 @@
 
 
 start
-  = _ line:statement? _ comment:comment? {
+  = _ line:statement? _ ';'? _ comment:comment? {
     return line ?? { expr: g.numeric('0') };
   }
 
