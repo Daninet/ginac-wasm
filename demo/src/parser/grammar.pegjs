@@ -237,6 +237,13 @@ value
   }
   / list_value
   / matrix_value
+  / wildcard
+
+
+wildcard
+  = '$' num:$([0-9]+) {
+    return g.wild(Number(num));
+  }
 
 
 list_value
@@ -319,6 +326,7 @@ negative_sign
     return sign.length % 2 === 1;
   }
 
+
 id
   = id:$([a-zA-Z_][a-zA-Z0-9_]*) {
     if (['Pi', 'pi'].includes(id)) {
@@ -338,6 +346,7 @@ id
     }
     return g.symbol(id);
   }
+
 
 _
   = whitespace?

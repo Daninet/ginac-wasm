@@ -483,10 +483,20 @@ GiNaC::ex parseType() {
       ioindex += str.length() + 1;
       return get_symbol(str, GiNaC::domain::real);
     }
-    case 0x10: {  // possymbol
+    case 0x0a: {  // possymbol
       std::string str(&iobufferstr[ioindex]);
       ioindex += str.length() + 1;
       return get_symbol(str, GiNaC::domain::positive);
+    }
+    case 0x0b: {  // idx
+      auto value = parseType();
+      auto dimension = parseType();
+      return GiNaC::idx(value, dimension);
+    }
+    case 0x0c: {  // wild
+      uint32_t id = *((uint32_t*)(iobufferstr + ioindex));
+      ioindex += 4;
+      return GiNaC::wild(id);
     }
     case 0x21:
       return parseFunction1();
@@ -527,9 +537,24 @@ GiNaC::lst parse() {
 void print_traverse_json(std::ostringstream& ss, GiNaC::ex& ex) {
   ss << "{\"type\":";
   if (is_a<GiNaC::symbol>(ex)) {
-    ss << "\"symbol\",";
-    ss << "\"name\":\"";
+    ss << "\"symbol\",\"name\":\"";
     ss << ex;
+    ss << "\",\"domain\":\"";
+    auto symbol = ex_to<GiNaC::symbol>(ex);
+    auto domain = symbol.get_domain();
+    switch (domain) {
+      case GiNaC::domain::real:
+        ss << "real";
+        break;
+      case GiNaC::domain::positive:
+        ss << "positive";
+        break;
+      case GiNaC::domain::complex:
+        ss << "complex";
+        break;
+      default:
+        ss << "unknown";
+    }
     ss << "\"";
   } else if (is_a<GiNaC::constant>(ex)) {
     ss << "\"constant\",";

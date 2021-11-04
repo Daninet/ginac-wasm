@@ -17,7 +17,7 @@ const parseLines = (lines: string[]) => {
     const line = lines[i];
     const parseResult = parse(line, prevValues);
     if (parseResult.error) {
-      throw new Error(`Cannot parse line "${line}"`);
+      throw new Error(`Cannot parse line "${line}": ${parseResult.error.message}`);
     }
     const { id, expr } = parseResult.ast;
     if (id) {

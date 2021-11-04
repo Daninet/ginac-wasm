@@ -6,19 +6,23 @@ export type GiNaCObject = {
   toString(): string;
 };
 
+function namedObjToBuf(code: number, name: string, buf: Uint8Array, index: number) {
+  const originalIndex = index;
+  buf[index++] = code;
+  const str = utf8encoder.encode(name);
+  buf.set(str, index);
+  index += str.length;
+  buf[index++] = 0;
+  return index - originalIndex;
+}
+
 export const numeric = (num: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
-      const originalIndex = index;
-      buf[index++] = 0x02;
-      const str = utf8encoder.encode(num);
-      buf.set(str, index);
-      index += str.length;
-      buf[index++] = 0;
-      return index - originalIndex;
+      return namedObjToBuf(0x02, num, buf, index);
     },
     toString() {
-      return num;
+      return `numeric(${JSON.stringify(num)})`;
     },
   };
 };
@@ -26,17 +30,11 @@ export const numeric = (num: string) => {
 export const symbol = (name: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
-      const originalIndex = index;
-      buf[index++] = 0x03;
-      const str = utf8encoder.encode(name);
-      buf.set(str, index);
-      index += str.length;
-      buf[index++] = 0;
-      return index - originalIndex;
+      return namedObjToBuf(0x03, name, buf, index);
     },
 
     toString() {
-      return name;
+      return `symbol(${JSON.stringify(name)})`;
     },
   };
 };
@@ -44,17 +42,11 @@ export const symbol = (name: string) => {
 export const realsymbol = (name: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
-      const originalIndex = index;
-      buf[index++] = 0x09;
-      const str = utf8encoder.encode(name);
-      buf.set(str, index);
-      index += str.length;
-      buf[index++] = 0;
-      return index - originalIndex;
+      return namedObjToBuf(0x09, name, buf, index);
     },
 
     toString() {
-      return name;
+      return `realsymbol(${JSON.stringify(name)})`;
     },
   };
 };
@@ -62,17 +54,44 @@ export const realsymbol = (name: string) => {
 export const possymbol = (name: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
+      return namedObjToBuf(0x0a, name, buf, index);
+    },
+
+    toString() {
+      return `possymbol(${JSON.stringify(name)})`;
+    },
+  };
+};
+
+export const idx = (value: GiNaCObject, dimension: GiNaCObject) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
-      buf[index++] = 0x0a;
-      const str = utf8encoder.encode(name);
-      buf.set(str, index);
-      index += str.length;
-      buf[index++] = 0;
+      buf[index++] = 0x0b;
+      index += value.toBuf(buf, index);
+      index += dimension.toBuf(buf, index);
       return index - originalIndex;
     },
 
     toString() {
-      return name;
+      return `idx(${value.toString()}, ${dimension.toString()})`;
+    },
+  };
+};
+
+export const wild = (id: number) => {
+  return {
+    toBuf(buf: Uint8Array, index: number) {
+      const originalIndex = index;
+      buf[index++] = 0x0c;
+      const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+      view.setUint32(index, id, true);
+      index += 4;
+      return index - originalIndex;
+    },
+
+    toString() {
+      return `wild(${id})`;
     },
   };
 };
@@ -97,7 +116,7 @@ export const lst = (items: GiNaCObject[]) => {
     },
 
     toString() {
-      return `{${items.map(item => item.toString()).join(', ')}}`;
+      return `lst(${items.map(item => item.toString()).join(', ')})`;
     },
   };
 };
@@ -131,11 +150,7 @@ export const matrix = (rows: number, columns: number, items: GiNaCObject[]) => {
     },
 
     toString() {
-      const chunked = [...Array(Math.ceil(items.length / columns))].map((_, i) =>
-        items.slice(i * columns, i * columns + columns),
-      );
-      const rows = chunked.map(r => `[${r.map(i => i.toString()).join(', ')}]`);
-      return `[${rows.join(', ')}]`;
+      return `matrix(${rows},${columns},${items.map(item => item.toString()).join(', ')})`;
     },
   };
 };
@@ -148,7 +163,7 @@ export const Pi = () => {
     },
 
     toString() {
-      return 'π';
+      return 'Pi()';
     },
   };
 };
@@ -161,7 +176,7 @@ export const Euler = () => {
     },
 
     toString() {
-      return 'γ';
+      return 'Euler()';
     },
   };
 };
@@ -175,7 +190,7 @@ export const Catalan = () => {
     },
 
     toString() {
-      return 'G';
+      return 'Catalan()';
     },
   };
 };
@@ -188,7 +203,7 @@ export const I = () => {
     },
 
     toString() {
-      return 'I';
+      return 'I()';
     },
   };
 };
@@ -226,17 +241,11 @@ export const ex = (ex: GiNaCObject) => {
 export const parse = (name: string) => {
   return {
     toBuf(buf: Uint8Array, index: number) {
-      const originalIndex = index;
-      buf[index++] = 0x07;
-      const str = utf8encoder.encode(name);
-      buf.set(str, index);
-      index += str.length;
-      buf[index++] = 0;
-      return index - originalIndex;
+      return namedObjToBuf(0x07, name, buf, index);
     },
 
     toString() {
-      return `parse(${ex.toString()})`;
+      return `parse(${name.toString()})`;
     },
   };
 };
@@ -255,7 +264,7 @@ export const unarchive = (arr: Uint8Array) => {
     },
 
     toString() {
-      return 'unarchive([...])';
+      return `unarchive(${arr.toString()})`;
     },
   };
 };
