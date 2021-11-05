@@ -285,14 +285,14 @@ numeric_value
 
 scientific_notation
   = val:(double / base10_integer / zero_integer) ('e' / 'E') '+'? exp:(base10_integer / zero_integer) {
-    const value = val.toString() + 'e' + exp.toString();
+    const value = val.value + 'e' + exp.value;
     return g.numeric(value);
   }
 
 
 double
   = whole:(base10_integer / zero_integer)? _ '.' _ frac:(_ base10_digits)* {
-    const wholePart = whole !== null ? whole.toString() : '0';
+    const wholePart = whole !== null ? whole.value : '0';
     const value = wholePart + '.' + unroll(null, frac, 1).join('');
     return g.numeric(value);
   }
