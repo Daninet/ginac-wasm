@@ -134,6 +134,10 @@ export const lcm = (ex1: GiNaCObject, ex2: GiNaCObject) => {
   return BaseFn('lcm', [ex1, ex2]);
 };
 
+export const sqrfree = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('sqrfree', [ex1, ex2]);
+};
+
 export const resultant = (ex1: GiNaCObject, ex2: GiNaCObject, ex3: GiNaCObject) => {
   return BaseFn('resultant', [ex1, ex2, ex3]);
 };
@@ -404,10 +408,6 @@ export const transpose = (ex: GiNaCObject) => {
   return BaseFn('transpose', [ex]);
 };
 
-export const indexed = () => {
-  throw new Error('Not implemented!');
-};
-
 export const simplify_indexed = () => {
   throw new Error('Not implemented!');
 };
@@ -612,4 +612,38 @@ export const match = (ex1: GiNaCObject, ex2: GiNaCObject) => {
 
 export const collect_common_factors = (ex: GiNaCObject) => {
   return BaseFn('collect_common_factors', [ex]);
+};
+
+export const canonical = (ex: GiNaCObject) => {
+  return BaseFn('canonical', [ex]);
+};
+
+export const is_polynomial = (ex1: GiNaCObject, ex2: GiNaCObject) => {
+  return BaseFn('is_polynomial', [ex1, ex2]);
+};
+
+export const symmetrize = (ex: GiNaCObject) => {
+  return BaseFn('symmetrize', [ex]);
+};
+
+export const antisymmetrize = (ex: GiNaCObject) => {
+  return BaseFn('antisymmetrize', [ex]);
+};
+
+export const symmetrize_cyclic = (ex: GiNaCObject) => {
+  return BaseFn('symmetrize_cyclic', [ex]);
+};
+
+export const indexed = (
+  ex1: GiNaCObject,
+  ex2?: GiNaCObject,
+  ex3?: GiNaCObject,
+  ex4?: GiNaCObject,
+  ex5?: GiNaCObject,
+) => {
+  if (ex5) return BaseFn('indexed5', [ex1, ex2, ex3, ex4, ex5]);
+  if (ex4) return BaseFn('indexed4', [ex1, ex2, ex3, ex4]);
+  if (ex3) return BaseFn('indexed3', [ex1, ex2, ex3]);
+  if (ex2) return BaseFn('indexed2', [ex1, ex2]);
+  return BaseFn('indexed', [ex1]);
 };

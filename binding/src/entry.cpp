@@ -116,12 +116,16 @@ GiNaC::ex parseFunction1() {
   if (FN_CMP(len, name, "abs")) return GiNaC::abs(param);
   if (FN_CMP(len, name, "acos")) return GiNaC::acos(param);
   if (FN_CMP(len, name, "acosh")) return GiNaC::acosh(param);
+  if (FN_CMP(len, name, "antisymmetrize")) return GiNaC::antisymmetrize(param);
   if (FN_CMP(len, name, "asin")) return GiNaC::asin(param);
   if (FN_CMP(len, name, "asinh")) return GiNaC::asinh(param);
   if (FN_CMP(len, name, "atan")) return GiNaC::atan(param);
   if (FN_CMP(len, name, "atanh")) return GiNaC::atanh(param);
   if (FN_CMP(len, name, "bernoulli")) {
     return GiNaC::bernoulli(try_ex_to<GiNaC::numeric>(param));
+  }
+  if (FN_CMP(len, name, "canonical")) {
+    return try_ex_to<GiNaC::relational>(param).canonical();
   }
   if (FN_CMP(len, name, "ceiling")) {
     auto num = try_ex_to<GiNaC::numeric>(param).to_cl_N();
@@ -173,6 +177,7 @@ GiNaC::ex parseFunction1() {
     return GiNaC::imag(try_ex_to<GiNaC::numeric>(param));
   }
   if (FN_CMP(len, name, "imag_part")) return GiNaC::imag_part(param);
+  if (FN_CMP(len, name, "indexed")) return GiNaC::indexed(param);
   if (FN_CMP(len, name, "inverse")) {
     if (is_a<GiNaC::matrix>(param)) {
       return GiNaC::inverse(ex_to<GiNaC::matrix>(param));
@@ -283,6 +288,10 @@ GiNaC::ex parseFunction1() {
   }
   if (FN_CMP(len, name, "sqrt")) return GiNaC::sqrt(param);
   if (FN_CMP(len, name, "step")) return GiNaC::step(param);
+  if (FN_CMP(len, name, "symmetrize")) return GiNaC::symmetrize(param);
+  if (FN_CMP(len, name, "symmetrize_cyclic")) {
+    return GiNaC::symmetrize_cyclic(param);
+  }
   if (FN_CMP(len, name, "tan")) return GiNaC::tan(param);
   if (FN_CMP(len, name, "tanh")) return GiNaC::tanh(param);
   if (FN_CMP(len, name, "tgamma")) return GiNaC::tgamma(param);
@@ -359,6 +368,7 @@ GiNaC::ex parseFunction2() {
   if (FN_CMP(len, name, "greaterThanOrEqualTo")) return param1 >= param2;
   if (FN_CMP(len, name, "H")) return GiNaC::H(param1, param2);
   if (FN_CMP(len, name, "has")) return GiNaC::has(param1, param2);
+  if (FN_CMP(len, name, "indexed2")) return GiNaC::indexed(param1, param2);
   if (FN_CMP(len, name, "irem")) {
     return GiNaC::irem(try_ex_to<GiNaC::numeric>(param1),
                        try_ex_to<GiNaC::numeric>(param2));
@@ -367,10 +377,13 @@ GiNaC::ex parseFunction2() {
     return GiNaC::iquo(try_ex_to<GiNaC::numeric>(param1),
                        try_ex_to<GiNaC::numeric>(param2));
   }
+  if (FN_CMP(len, name, "lcm")) return GiNaC::lcm(param1, param2);
   if (FN_CMP(len, name, "iterated_integral")) {
     return GiNaC::iterated_integral(param1, param2);
   }
-  if (FN_CMP(len, name, "lcm")) return GiNaC::lcm(param1, param2);
+  if (FN_CMP(len, name, "is_polynomial")) {
+    return GiNaC::is_polynomial(param1, param2);
+  }
   if (FN_CMP(len, name, "ldegree")) return GiNaC::ldegree(param1, param2);
   if (FN_CMP(len, name, "lessThan")) return param1 < param2;
   if (FN_CMP(len, name, "lessThanOrEqualTo")) return param1 <= param2;
@@ -472,6 +485,9 @@ GiNaC::ex parseFunction3() {
   }
   if (FN_CMP(len, name, "divide")) return GiNaC::divide(param1, param2, param3);
   if (FN_CMP(len, name, "G3")) return GiNaC::G(param1, param2, param3);
+  if (FN_CMP(len, name, "indexed3")) {
+    return GiNaC::indexed(param1, param2, param3);
+  }
   if (FN_CMP(len, name, "iterated_integral3")) {
     return GiNaC::iterated_integral(param1, param2, param3);
   }
@@ -515,6 +531,10 @@ GiNaC::ex parseFunction4() {
                          try_ex_to<GiNaC::numeric>(param4));
   }
 
+  if (FN_CMP(len, name, "indexed4")) {
+    return GiNaC::indexed(param1, param2, param3, param4);
+  }
+
   if (FN_CMP(len, name, "integral")) {
     return GiNaC::integral(param1, param2, param3, param4);
   }
@@ -535,6 +555,10 @@ GiNaC::ex parseFunction5() {
 
   if (FN_CMP(len, name, "adaptivesimpson")) {
     return GiNaC::adaptivesimpson(param1, param2, param3, param4, param5);
+  }
+
+  if (FN_CMP(len, name, "indexed5")) {
+    return GiNaC::indexed(param1, param2, param3, param4, param5);
   }
 
   if (FN_CMP(len, name, "sub_matrix")) {
@@ -729,6 +753,8 @@ void print_traverse_json(std::ostringstream& ss, GiNaC::ex& ex) {
     ss << "\"spinidx\"";
   } else if (is_a<GiNaC::wildcard>(ex)) {
     ss << "\"wildcard\"";
+  } else if (is_a<GiNaC::fail>(ex)) {
+    ss << "\"fail\"";
   } else {
     ss << "\"unknown\"";
   }
