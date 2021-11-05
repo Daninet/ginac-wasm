@@ -56,3 +56,8 @@ jobs:
           build_dir: demo/dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - run: npm publish
+        env:
+          CI: true
