@@ -22,15 +22,40 @@ const JSONTestObjects = [
 (async () => {
   const GiNaC = await initGiNaC('./dist/ginac.wasm');
   // console.log(GiNaC.print(['1+2', '2+3']));
-  console.dir(
-    GiNaC(JSONTestObjects, {
+  // console.log(GiNaC(g.mul(g.numeric('2'), g.pow(g.symbol('x'), g.numeric('2')))));
+  // console.log(GiNaC(g.series(g.atan(g.symbol('x')), g.symbol('x'), g.numeric('5'))));
+  console.log(
+    GiNaC([g.equal(g.symbol('x'), g.numeric('2')), g.sin(g.add(g.symbol('x'), g.mul(g.numeric('2'), g.symbol('y'))))], {
       string: true,
-      // latex: true,
-      // tree: true,
-      json: true,
     }),
-    { depth: null },
   );
+
+  // console.log(
+  //   GiNaC(
+  //     [
+  //       g.unarchive(
+  //         new Uint8Array([
+  //           71, 65, 82, 67, 3, 12, 99, 108, 97, 115, 115, 0, 114, 101, 108, 97, 116, 105, 111, 110, 97, 108, 0, 115,
+  //           121, 109, 98, 111, 108, 0, 110, 97, 109, 101, 0, 120, 0, 108, 104, 0, 110, 117, 109, 101, 114, 105, 99, 0,
+  //           110, 117, 109, 98, 101, 114, 0, 50, 0, 114, 104, 0, 111, 112, 0, 101, 120, 0, 1, 11, 2, 3, 2, 2, 2, 26, 4,
+  //           2, 2, 6, 58, 8, 4, 2, 1, 43, 0, 75, 1, 81, 0, 0, 0, 0,
+  //         ]),
+  //       ),
+  //     ],
+  //     {
+  //       string: true,
+  //     },
+  //   ),
+  // );
+  // console.dir(
+  //   GiNaC(JSONTestObjects, {
+  //     string: true,
+  //     // latex: true,
+  //     // tree: true,
+  //     json: true,
+  //   }),
+  //   { depth: null },
+  // );
 
   // console.log(
   //   GiNaC([
