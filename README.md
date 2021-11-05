@@ -6,7 +6,7 @@ Demo frontend: https://daninet.github.io/ginac-wasm
 ## Usage
 
 ```js
-const { initGiNaC, getFactory: g } = require('ginac-wasm');
+const { initGiNaC, getFactory } = require('ginac-wasm');
 
 (async () => {
   const GiNaC = await initGiNaC('ginac-wasm/dist/ginac.wasm');
