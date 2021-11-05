@@ -1,6 +1,14 @@
 // #include <iostream>
 #include <cln/integer.h>
+#include <cln/integer_io.h>
+#include <cln/integer_ring.h>
 #include <cln/real.h>
+#include <cln/real_io.h>
+#include <cln/real_ring.h>
+#include <cln/rational_io.h>
+#include <cln/rational_ring.h>
+#include <cln/output.h>
+#include <cln/ring.h>
 #include <emscripten.h>
 #include <ginac/ginac.h>
 
@@ -654,6 +662,23 @@ GiNaC::lst parse() {
 //   console.log('from c', $0, $1, $2)
 // }, iobuffer, iobuffer[0], iobuffer[1]);
 
+void print_json_number(std::ostringstream& ss, cln::cl_R& r) {
+  cln::cl_print_flags ourflags;
+  if (cln::instanceof(r, cln::cl_RA_ring)) {
+    auto ra = cln::the<cln::cl_RA>(r);
+    ss << "\"";
+    cln::print_integer(ss, ourflags, cln::numerator(ra));
+    ss << "\",\"";
+    cln::print_integer(ss, ourflags, cln::denominator(ra));
+    ss << "\"";
+  } else {
+    ourflags.default_float_format = cln::float_format(cln::the<cln::cl_F>(r));
+    ss << "\"";
+    cln::print_real(ss, ourflags, r);
+    ss << "\",\"1\"";
+  }
+}
+
 void print_traverse_json(std::ostringstream& ss, GiNaC::ex& ex) {
   ss << "{\"type\":";
   if (is_a<GiNaC::symbol>(ex)) {
@@ -682,25 +707,16 @@ void print_traverse_json(std::ostringstream& ss, GiNaC::ex& ex) {
     ss << ex;
     ss << "\"";
   } else if (is_a<GiNaC::numeric>(ex)) {
-    ss << "\"numeric\",";
-    ss << "\"value\":\"";
-    ss << ex;
-    ss << "\",\"subtype\":\"";
+    ss << "\"numeric\",\"value\":[";
     auto num = ex_to<GiNaC::numeric>(ex);
-    if (GiNaC::is_integer(num)) {
-      ss << "integer";
-    } else if (GiNaC::is_rational(num)) {
-      ss << "rational";
-    } else if (GiNaC::is_real(num)) {
-      ss << "real";
-    } else if (GiNaC::is_cinteger(num)) {
-      ss << "cinteger";
-    } else if (GiNaC::is_crational(num)) {
-      ss << "crational";
-    } else {
-      ss << "unknown";
+    cln::cl_R real = cln::realpart(num.to_cl_N());
+    print_json_number(ss, real);
+    cln::cl_R imag = cln::imagpart(num.to_cl_N());
+    if (!cln::zerop(imag)) {
+      ss << ",";
+      print_json_number(ss, imag);
     }
-    ss << "\"";
+    ss << "]";
   } else if (is_a<GiNaC::add>(ex)) {
     ss << "\"add\"";
   } else if (is_a<GiNaC::mul>(ex)) {
