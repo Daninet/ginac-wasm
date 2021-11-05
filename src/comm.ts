@@ -16,19 +16,24 @@ function namedObjToBuf(code: number, name: string, buf: Uint8Array, index: numbe
   return index - originalIndex;
 }
 
-export const numeric = (num: string) => {
+export const numeric = (value: string) => {
   return {
+    value,
+
     toBuf(buf: Uint8Array, index: number) {
-      return namedObjToBuf(0x02, num, buf, index);
+      return namedObjToBuf(0x02, value, buf, index);
     },
+
     toString() {
-      return `numeric(${JSON.stringify(num)})`;
+      return `numeric(${JSON.stringify(value)})`;
     },
   };
 };
 
 export const symbol = (name: string) => {
   return {
+    name,
+
     toBuf(buf: Uint8Array, index: number) {
       return namedObjToBuf(0x03, name, buf, index);
     },
@@ -41,6 +46,8 @@ export const symbol = (name: string) => {
 
 export const realsymbol = (name: string) => {
   return {
+    name,
+
     toBuf(buf: Uint8Array, index: number) {
       return namedObjToBuf(0x09, name, buf, index);
     },
@@ -53,6 +60,8 @@ export const realsymbol = (name: string) => {
 
 export const possymbol = (name: string) => {
   return {
+    name,
+
     toBuf(buf: Uint8Array, index: number) {
       return namedObjToBuf(0x0a, name, buf, index);
     },
@@ -65,6 +74,9 @@ export const possymbol = (name: string) => {
 
 export const idx = (value: GiNaCObject, dimension: GiNaCObject) => {
   return {
+    value,
+    dimension,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x0b;
@@ -81,6 +93,8 @@ export const idx = (value: GiNaCObject, dimension: GiNaCObject) => {
 
 export const wild = (id: number) => {
   return {
+    value: id,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x0c;
@@ -102,6 +116,8 @@ export const lst = (items: GiNaCObject[]) => {
   }
 
   return {
+    items,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x04;
@@ -139,6 +155,10 @@ export const matrix = (rows: number, columns: number, items: GiNaCObject[]) => {
   }
 
   return {
+    rows,
+    columns,
+    items,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x05;
@@ -183,7 +203,6 @@ export const Euler = () => {
 
 export const Catalan = () => {
   return {
-    type: 'const',
     toBuf(buf: Uint8Array, index: number) {
       buf[index++] = 0xa2;
       return 1;
@@ -210,6 +229,8 @@ export const I = () => {
 
 export const ref = (refIndex: number) => {
   return {
+    value: refIndex,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x06;
@@ -225,6 +246,8 @@ export const ref = (refIndex: number) => {
 
 export const ex = (ex: GiNaCObject) => {
   return {
+    value: ex,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x01;
@@ -238,20 +261,24 @@ export const ex = (ex: GiNaCObject) => {
   };
 };
 
-export const parse = (name: string) => {
+export const parse = (value: string) => {
   return {
+    value,
+
     toBuf(buf: Uint8Array, index: number) {
-      return namedObjToBuf(0x07, name, buf, index);
+      return namedObjToBuf(0x07, value, buf, index);
     },
 
     toString() {
-      return `parse(${name.toString()})`;
+      return `parse(${value.toString()})`;
     },
   };
 };
 
 export const unarchive = (arr: Uint8Array) => {
   return {
+    value: arr,
+
     toBuf(buf: Uint8Array, index: number) {
       const originalIndex = index;
       buf[index++] = 0x08;

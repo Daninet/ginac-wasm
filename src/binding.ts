@@ -4,6 +4,7 @@ import { GiNaCObject } from './comm';
 const utf8decoder = new TextDecoder();
 
 export interface PrintOptions {
+  input?: string;
   string?: boolean;
   latex?: boolean;
   tree?: boolean;
@@ -47,6 +48,7 @@ export interface JSONObj {
 }
 
 export interface PrintOutput {
+  input?: string;
   string?: string;
   latex?: string;
   tree?: string;
@@ -102,9 +104,12 @@ const makeInstance = (binding: any) => {
     return res;
   };
 
-  const listToResObject = (arr: Uint8Array[], opts: PrintOptions) => {
+  const listToResObject = (ex: GiNaCObject, arr: Uint8Array[], opts: PrintOptions) => {
     const res = {} as PrintOutput;
     let index = 0;
+    if (opts.input) {
+      res.input = ex.toString();
+    }
     if (opts.string) {
       res.string = utf8decoder.decode(arr[index++]);
     }
@@ -129,7 +134,7 @@ const makeInstance = (binding: any) => {
     return res;
   };
 
-  const makeRead = (opts: PrintOptions) => {
+  const makeRead = (exs: GiNaCObject[], opts: PrintOptions) => {
     let chunks = 0;
     if (opts.string) chunks++;
     if (opts.latex) chunks++;
@@ -137,7 +142,7 @@ const makeInstance = (binding: any) => {
     if (opts.archive) chunks++;
     if (opts.json) chunks++;
     const res = readResponseList(chunks);
-    return res.map(ex => listToResObject(ex, opts));
+    return res.map((ex, index) => listToResObject(exs[index], ex, opts));
   };
 
   return {
@@ -150,7 +155,7 @@ const makeInstance = (binding: any) => {
       const optsInt = encodePrintOptions(opts);
       try {
         binding._ginac_print(optsInt);
-        const res = makeRead(opts);
+        const res = makeRead(exs, opts);
         return res;
       } catch (err) {
         binding._ginac_get_exception(err);

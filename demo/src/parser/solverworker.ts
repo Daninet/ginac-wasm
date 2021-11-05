@@ -1,4 +1,5 @@
 import wasmBinary from '../../../dist/ginac.wasm';
+/// <reference path="../../../dist/types/index.d.ts" />
 import { initGiNaC } from '../../../dist/index.esm.min.js';
 import { parse } from './parser';
 
@@ -34,8 +35,12 @@ const parseLines = (lines: string[]) => {
   let res = [];
 
   try {
+    console.time('parsing');
     const asts = parseLines(lines);
-    res = GiNaC(asts);
+    console.timeEnd('parsing');
+    console.time('evaluating');
+    res = GiNaC(asts, { string: true, input: true, json: true, latex: true, tree: true });
+    console.timeEnd('evaluating');
   } catch (err) {
     console.error(err);
     res = err.message ?? 'Evaluation error';

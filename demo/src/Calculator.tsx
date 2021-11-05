@@ -1,39 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DEMOS } from './demos';
-import { solve } from './parser/solver';
+import { InputFormatType, INPUT_FORMAT, OutputFormatType, OUTPUT_FORMAT, ResultView } from './ResultView';
 
 export const Calculator = ({}) => {
   const currentDemoFromUrl = decodeURIComponent((window.location.hash ?? '#').slice(1));
   const [demoName, setDemoName] = useState(
     DEMOS.find(d => d.name === currentDemoFromUrl) ? currentDemoFromUrl : 'Estimate PI',
   );
+  const [inputFormat, setInputFormat] = useState<InputFormatType>(INPUT_FORMAT[0].value);
+  const [outputFormat, setOutputFormat] = useState<OutputFormatType>(OUTPUT_FORMAT[0].value);
   const [input, setInput] = useState('');
+  const [evaluatedInputs, setEvaluatedInputs] = useState<string[]>([]);
   const [modified, setModified] = useState(false);
-  type MathResult = { error?: string; inputs?: string[]; results?: string[]; time: number };
-  const [result, setResult] = useState<MathResult>(null);
   const [loading, setLoading] = useState(false);
 
-  const onCalculate = useCallback(async (input: string) => {
+  const onCalculate = useCallback((input: string) => {
     setLoading(true);
-    try {
-      const start = performance.now();
-      const lines = input.split('\n').filter(x => !!x.trim());
-      const results = await solve(lines);
-      const end = performance.now();
-
-      if (typeof results === 'string') {
-        setResult({ error: results, time: end - start });
-      } else {
-        setResult({
-          inputs: lines,
-          results: results.map(r => r.string ?? r.error),
-          time: end - start,
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    setLoading(false);
+    const lines = input.split('\n').filter(x => !!x.trim());
+    setEvaluatedInputs(lines);
   }, []);
 
   useEffect(() => {
@@ -42,32 +26,16 @@ export const Calculator = ({}) => {
     setInput(newInput);
     onCalculate(newInput);
     window.location.hash = encodeURIComponent(demoName);
-  }, [demoName, onCalculate]);
+  }, [onCalculate, demoName]);
 
   const onSubmit: React.FormEventHandler = async e => {
     e.preventDefault();
     onCalculate(input);
   };
 
-  const printResult = (index: number) => {
-    return (
-      <div
-        key={result.inputs[index] + result.results[index] + Date.now()}
-        style={{
-          padding: 3,
-          background: '#eee',
-          fontFamily: 'monospace',
-        }}
-      >
-        <span style={{ color: '#030e0d', wordBreak: 'break-word' }}>
-          {'>>'} {result.inputs[index]}
-        </span>
-        <br />
-        <span style={{ color: '#378100', wordBreak: 'break-word' }}>{result.results[index]}</span>
-        <br />
-      </div>
-    );
-  };
+  const onEvaluationFinished = useCallback(() => {
+    setLoading(false);
+  }, []);
 
   return (
     <>
@@ -98,27 +66,40 @@ export const Calculator = ({}) => {
             lineHeight: 1.3,
           }}
         />
-        <button disabled={loading} type="submit" style={{ padding: '6px 20px', marginBottom: 20 }}>
-          {loading ? 'Loading...' : 'Evaluate'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'baseline' }}>
+          <div>
+            <button disabled={loading} type="submit" style={{ padding: '6px 20px', marginBottom: 20 }}>
+              Evaluate
+            </button>
+          </div>
+          <div style={{ marginLeft: 15 }}>
+            Input format: {/* eslint-disable-next-line jsx-a11y/no-onchange */}
+            <select value={inputFormat} onChange={e => setInputFormat(e.currentTarget.value as InputFormatType)}>
+              {INPUT_FORMAT.map(d => (
+                <option key={d.name} value={d.value}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ marginLeft: 15 }}>
+            Output format: {/* eslint-disable-next-line jsx-a11y/no-onchange */}
+            <select value={outputFormat} onChange={e => setOutputFormat(e.currentTarget.value as OutputFormatType)}>
+              {OUTPUT_FORMAT.map(d => (
+                <option key={d.name} value={d.value}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </form>
-      <div style={{ textAlign: 'left', fontFamily: "'Inconsolata', monospace" }}>
-        {result ? (
-          <>
-            {result.error ? (
-              <span style={{ color: '#ff0000' }}>
-                {result.error}
-                <br />
-              </span>
-            ) : (
-              result.results.map((_, index) => printResult(index))
-            )}
-          </>
-        ) : null}
-      </div>
-      {result ? (
-        <strong style={{ display: 'block', marginTop: 15 }}>Executed in {result.time.toFixed(1)} ms</strong>
-      ) : null}
+      <ResultView
+        inputLines={evaluatedInputs}
+        inputFormat={inputFormat}
+        outputFormat={outputFormat}
+        onEvaluationFinished={onEvaluationFinished}
+      />
     </>
   );
 };

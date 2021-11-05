@@ -19,8 +19,17 @@ export const initSolver = () => {
   });
 };
 
+type SolveResponseType = {
+  input: string;
+  string: string;
+  error?: string;
+  json: string;
+  latex: string;
+  tree: string;
+};
+
 export const solve = (lines: string[]) => {
-  return new Promise<{ string: string; error?: string }[]>(resolve => {
+  return new Promise<SolveResponseType[]>(resolve => {
     promises.push(resolve);
     solverworker.postMessage({ lines });
   });
